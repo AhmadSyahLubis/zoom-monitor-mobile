@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/date_time_util.dart';
 
 class DashboardHero extends StatelessWidget {
@@ -16,36 +15,28 @@ class DashboardHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      child: ClipRRect(
+      decoration: BoxDecoration(
+        color: const Color(0xFF142232),
         borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: const Color(0xFF22364A),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(21),
         child: Stack(
           children: [
-            const Positioned.fill(
-              child: Image(
-                image: ResizeImage(
-                  AssetImage('assets/images/meeting_room_hero.png'),
-                  width: 600,
-                ),
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
-              ),
-            ),
-            const Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Color(0xF0183040),
-                      Color(0xD9183040),
-                      Color(0x65183040)
-                    ],
-                    stops: [0, 0.62, 1],
-                  ),
-                ),
+            // Subtle watermark geometry (vector, zero raster memory)
+            Positioned(
+              right: -16,
+              bottom: -20,
+              child: Icon(
+                PhosphorIconsRegular.videoCamera,
+                size: 160,
+                color: Colors.white.withValues(alpha: 0.04),
               ),
             ),
             Padding(
@@ -53,49 +44,75 @@ class DashboardHero extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    DateTimeUtil.formatDateOnlyWib(
-                        DateTime.now().toIso8601String()),
-                    style: const TextStyle(
-                      color: Color(0xFFE4EEEC),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(
+                        PhosphorIconsRegular.calendarBlank,
+                        size: 14,
+                        color: Color(0xFF94A3B8),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        DateTimeUtil.formatDateOnlyWib(
+                          DateTime.now().toIso8601String(),
+                        ),
+                        style: const TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   Text(
                     '${DateTimeUtil.getGreeting()}, $userName',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 23,
-                      height: 1.18,
+                      fontSize: 22,
+                      height: 1.2,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    'Cari akun tersedia untuk rapat berikutnya.',
-                    style: TextStyle(color: Color(0xFFE4EEEC), fontSize: 13),
+                    'Cari akun Zoom yang tersedia untuk sesi rapat Anda.',
+                    style: TextStyle(
+                      color: Color(0xFFCBD5E1),
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 20),
                   FilledButton.icon(
                     onPressed: onSearch,
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFFF5F8F5),
-                      foregroundColor: AppColors.primaryDark,
+                      backgroundColor: const Color(0xFFF1F5F9),
+                      foregroundColor: const Color(0xFF0F172A),
                       minimumSize: const Size(0, 48),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      elevation: 0,
                     ),
-                    icon: const Icon(PhosphorIconsRegular.magnifyingGlass,
-                        size: 18),
+                    icon: const Icon(
+                      PhosphorIconsRegular.magnifyingGlass,
+                      size: 18,
+                    ),
                     label: const Text(
-                      'Cari waktu rapat',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      'Cari ketersediaan ruang',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
