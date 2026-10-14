@@ -1,0 +1,13 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icons/zoom_monitor_app_icon.png
+  remove_alpha_ios: true
+  adaptive_icon_background: "#1B3450"
+  adaptive_icon_foreground: assets/icons/zoom_monitor_adaptive_foreground.png
+  adaptive_icon_foreground_inset: 12
+  web:
+    generate: true
+    image_path: assets/icons/zoom_monitor_app_icon.png
+    background_color: "#1B3450"
+    theme_color: "#1B3450"
