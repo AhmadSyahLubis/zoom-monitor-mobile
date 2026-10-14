@@ -216,7 +216,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           color: AppColors.textMuted),
                     ),
                     items: const [
+                      DropdownMenuItem(value: 15, child: Text('15 Menit')),
                       DropdownMenuItem(value: 30, child: Text('30 Menit')),
+                      DropdownMenuItem(value: 45, child: Text('45 Menit')),
                       DropdownMenuItem(
                           value: 60, child: Text('60 Menit (1 Jam)')),
                       DropdownMenuItem(
@@ -227,6 +229,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           value: 180, child: Text('180 Menit (3 Jam)')),
                       DropdownMenuItem(
                           value: 240, child: Text('240 Menit (4 Jam)')),
+                      DropdownMenuItem(
+                          value: 300, child: Text('300 Menit (5 Jam)')),
+                      DropdownMenuItem(
+                          value: 360, child: Text('360 Menit (6 Jam)')),
+                      DropdownMenuItem(
+                          value: 480, child: Text('480 Menit (8 Jam - Seharian)')),
                     ],
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedDuration = val);

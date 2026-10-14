@@ -18,10 +18,17 @@ class DashboardHero extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF142232),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0F2642),
+            Color(0xFF0A1B30),
+          ],
+        ),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: const Color(0xFF22364A),
+          color: const Color(0xFF1E3A5F),
           width: 1,
         ),
       ),
@@ -29,14 +36,75 @@ class DashboardHero extends StatelessWidget {
         borderRadius: BorderRadius.circular(21),
         child: Stack(
           children: [
-            // Subtle watermark geometry (vector, zero raster memory)
+            // Telemetry radar rings watermark (matching the app icon brand motif)
             Positioned(
-              right: -16,
-              bottom: -20,
-              child: Icon(
-                PhosphorIconsRegular.videoCamera,
-                size: 160,
-                color: Colors.white.withValues(alpha: 0.04),
+              right: -30,
+              bottom: -40,
+              child: SizedBox(
+                width: 220,
+                height: 220,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 140,
+                      height: 140,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.07),
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.09),
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      PhosphorIconsRegular.videoCamera,
+                      size: 38,
+                      color: Colors.white.withValues(alpha: 0.12),
+                    ),
+                    // Active pulse blip
+                    Positioned(
+                      top: 36,
+                      right: 48,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2ECC71).withValues(alpha: 0.8),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF2ECC71).withValues(alpha: 0.4),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             Padding(

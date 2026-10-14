@@ -337,23 +337,41 @@ class _EditMeetingDialogState extends ConsumerState<EditMeetingDialog> {
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
             const SizedBox(height: 6),
-            DropdownButtonFormField<int>(
-              initialValue: _duration,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(PhosphorIconsRegular.timer,
-                    color: AppColors.textMuted),
-              ),
-              items: const [
-                DropdownMenuItem(value: 30, child: Text('30 Menit')),
-                DropdownMenuItem(value: 45, child: Text('45 Menit')),
-                DropdownMenuItem(value: 60, child: Text('1 Jam (60 Menit)')),
-                DropdownMenuItem(value: 90, child: Text('1.5 Jam (90 Menit)')),
-                DropdownMenuItem(value: 120, child: Text('2 Jam (120 Menit)')),
-                DropdownMenuItem(value: 180, child: Text('3 Jam (180 Menit)')),
-                DropdownMenuItem(value: 240, child: Text('4 Jam (240 Menit)')),
-              ],
-              onChanged: (val) {
-                if (val != null) setState(() => _duration = val);
+            Builder(
+              builder: (context) {
+                final standardDurations = <int, String>{
+                  15: '15 Menit',
+                  30: '30 Menit',
+                  45: '45 Menit',
+                  60: '1 Jam (60 Menit)',
+                  90: '1.5 Jam (90 Menit)',
+                  120: '2 Jam (120 Menit)',
+                  180: '3 Jam (180 Menit)',
+                  240: '4 Jam (240 Menit)',
+                  300: '5 Jam (300 Menit)',
+                  360: '6 Jam (360 Menit)',
+                  480: '8 Jam (480 Menit - Seharian)',
+                };
+                if (!standardDurations.containsKey(_duration)) {
+                  standardDurations[_duration] = '$_duration Menit';
+                }
+                final sortedKeys = standardDurations.keys.toList()..sort();
+                return DropdownButtonFormField<int>(
+                  initialValue: _duration,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(PhosphorIconsRegular.timer,
+                        color: AppColors.textMuted),
+                  ),
+                  items: sortedKeys.map((minutes) {
+                    return DropdownMenuItem<int>(
+                      value: minutes,
+                      child: Text(standardDurations[minutes]!),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _duration = val);
+                  },
+                );
               },
             ),
             const SizedBox(height: 16),
