@@ -356,6 +356,7 @@ class _EditMeetingDialogState extends ConsumerState<EditMeetingDialog> {
                 }
                 final sortedKeys = standardDurations.keys.toList()..sort();
                 return DropdownButtonFormField<int>(
+                  isExpanded: true,
                   initialValue: _duration,
                   decoration: const InputDecoration(
                     prefixIcon: Icon(PhosphorIconsRegular.timer,
@@ -364,7 +365,10 @@ class _EditMeetingDialogState extends ConsumerState<EditMeetingDialog> {
                   items: sortedKeys.map((minutes) {
                     return DropdownMenuItem<int>(
                       value: minutes,
-                      child: Text(standardDurations[minutes]!),
+                      child: Text(
+                        standardDurations[minutes]!,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     );
                   }).toList(),
                   onChanged: (val) {
@@ -391,12 +395,13 @@ class _EditMeetingDialogState extends ConsumerState<EditMeetingDialog> {
               const SizedBox(height: 8),
               // Tipe Perulangan
               DropdownButtonFormField<int>(
+                isExpanded: true,
                 initialValue: _recurringType,
                 decoration: const InputDecoration(labelText: 'Tipe Perulangan'),
                 items: const [
-                  DropdownMenuItem(value: 1, child: Text('Harian (Daily)')),
-                  DropdownMenuItem(value: 2, child: Text('Mingguan (Weekly)')),
-                  DropdownMenuItem(value: 3, child: Text('Bulanan (Monthly)')),
+                  DropdownMenuItem(value: 1, child: Text('Harian (Daily)', overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(value: 2, child: Text('Mingguan (Weekly)', overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(value: 3, child: Text('Bulanan (Monthly)', overflow: TextOverflow.ellipsis)),
                 ],
                 onChanged: (val) {
                   if (val != null) setState(() => _recurringType = val);

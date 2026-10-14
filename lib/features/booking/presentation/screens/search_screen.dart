@@ -209,6 +209,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
                   // Dropdown Durasi
                   DropdownButtonFormField<int>(
+                    isExpanded: true,
                     initialValue: _selectedDuration,
                     decoration: const InputDecoration(
                       labelText: 'Durasi Rapat',
@@ -216,25 +217,25 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           color: AppColors.textMuted),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 15, child: Text('15 Menit')),
-                      DropdownMenuItem(value: 30, child: Text('30 Menit')),
-                      DropdownMenuItem(value: 45, child: Text('45 Menit')),
+                      DropdownMenuItem(value: 15, child: Text('15 Menit', overflow: TextOverflow.ellipsis)),
+                      DropdownMenuItem(value: 30, child: Text('30 Menit', overflow: TextOverflow.ellipsis)),
+                      DropdownMenuItem(value: 45, child: Text('45 Menit', overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 60, child: Text('60 Menit (1 Jam)')),
+                          value: 60, child: Text('60 Menit (1 Jam)', overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 90, child: Text('90 Menit (1.5 Jam)')),
+                          value: 90, child: Text('90 Menit (1.5 Jam)', overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 120, child: Text('120 Menit (2 Jam)')),
+                          value: 120, child: Text('120 Menit (2 Jam)', overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 180, child: Text('180 Menit (3 Jam)')),
+                          value: 180, child: Text('180 Menit (3 Jam)', overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 240, child: Text('240 Menit (4 Jam)')),
+                          value: 240, child: Text('240 Menit (4 Jam)', overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 300, child: Text('300 Menit (5 Jam)')),
+                          value: 300, child: Text('300 Menit (5 Jam)', overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 360, child: Text('360 Menit (6 Jam)')),
+                          value: 360, child: Text('360 Menit (6 Jam)', overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 480, child: Text('480 Menit (8 Jam - Seharian)')),
+                          value: 480, child: Text('480 Menit (8 Jam - Seharian)', overflow: TextOverflow.ellipsis)),
                     ],
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedDuration = val);
