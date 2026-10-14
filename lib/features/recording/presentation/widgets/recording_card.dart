@@ -33,29 +33,35 @@ class RecordingCard extends StatelessWidget {
           children: [
             // Top: Akun & File Count
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(8),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(PhosphorIconsFill.cloudCheck,
+                            color: AppColors.primary, size: 16),
                       ),
-                      child: const Icon(PhosphorIconsFill.cloudCheck,
-                          color: AppColors.primary, size: 16),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      recording.accountName,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textMuted),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          recording.accountName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textMuted),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -93,10 +99,14 @@ class RecordingCard extends StatelessWidget {
                 const Icon(PhosphorIconsRegular.clock,
                     size: 14, color: AppColors.textMuted),
                 const SizedBox(width: 6),
-                Text(
-                  DateTimeUtil.formatWib(recording.startTime),
-                  style:
-                      const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                Expanded(
+                  child: Text(
+                    DateTimeUtil.formatWib(recording.startTime),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.textMuted),
+                  ),
                 ),
               ],
             ),

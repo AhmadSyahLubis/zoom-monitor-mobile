@@ -169,22 +169,21 @@ class _EditMeetingDialogState extends ConsumerState<EditMeetingDialog> {
           children: [
             // Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
-                  children: [
-                    Icon(PhosphorIconsRegular.pencilSimple,
-                        color: AppColors.primary, size: 22),
-                    SizedBox(width: 8),
-                    Text(
-                      'Edit Jadwal Rapat',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textMain,
-                      ),
+                const Icon(PhosphorIconsRegular.pencilSimple,
+                    color: AppColors.primary, size: 22),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Edit Jadwal Rapat',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textMain,
                     ),
-                  ],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close_rounded),

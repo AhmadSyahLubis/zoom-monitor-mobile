@@ -95,16 +95,16 @@ class MeetingCard extends StatelessWidget {
                 const Icon(PhosphorIconsRegular.clock,
                     size: 15, color: AppColors.textMuted),
                 const SizedBox(width: 6),
-                Text(
-                  DateTimeUtil.formatWib(meeting.startTime),
-                  style:
-                      const TextStyle(fontSize: 13, color: AppColors.textMain),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '(${meeting.duration} mnt)',
-                  style:
-                      const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                Expanded(
+                  child: Text(
+                    '${DateTimeUtil.formatWib(meeting.startTime)} (${meeting.duration} mnt)',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textMain,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -140,9 +140,11 @@ class MeetingCard extends StatelessWidget {
                         backgroundColor: type == MeetingCardType.live
                             ? AppColors.statusMeeting
                             : AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 8),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
+                        visualDensity: VisualDensity.compact,
                       ),
                       onPressed: () async {
                         final uri = Uri.parse(meeting.joinUrl);
@@ -152,26 +154,32 @@ class MeetingCard extends StatelessWidget {
                         }
                       },
                       icon: const Icon(PhosphorIconsFill.videoCamera,
-                          size: 16, color: Colors.white),
+                          size: 15, color: Colors.white),
                       label: Text(
                         type == MeetingCardType.live
                             ? 'Gabung Live'
                             : 'Gabung Zoom',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: Colors.white),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                 ],
 
                 // Tombol Salin Undangan
                 IconButton.outlined(
+                  visualDensity: VisualDensity.compact,
+                  constraints:
+                      const BoxConstraints(minWidth: 36, minHeight: 36),
+                  padding: const EdgeInsets.all(6),
                   tooltip: 'Salin Undangan',
                   icon: const Icon(PhosphorIconsRegular.copy,
-                      size: 18, color: AppColors.textMain),
+                      size: 16, color: AppColors.textMain),
                   onPressed: () {
                     final invite = InviteFormatter.formatInvite(
                       topic: meeting.topic,
@@ -193,26 +201,34 @@ class MeetingCard extends StatelessWidget {
 
                 // Tombol Akhiri Rapat jika Live
                 if (type == MeetingCardType.live && onEndMeeting != null) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   IconButton(
+                    visualDensity: VisualDensity.compact,
+                    constraints:
+                        const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: const EdgeInsets.all(6),
                     style: IconButton.styleFrom(
                         backgroundColor: AppColors.statusMeetingBg),
                     tooltip: 'Paksa Selesai Rapat',
                     icon: const Icon(PhosphorIconsRegular.phoneDisconnect,
-                        size: 18, color: AppColors.statusMeeting),
+                        size: 16, color: AppColors.statusMeeting),
                     onPressed: onEndMeeting,
                   ),
                 ],
 
                 // Tombol Edit Rapat jika Upcoming atau Live
                 if (onEditMeeting != null) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   IconButton(
+                    visualDensity: VisualDensity.compact,
+                    constraints:
+                        const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: const EdgeInsets.all(6),
                     style: IconButton.styleFrom(
                         backgroundColor: AppColors.primaryLight),
                     tooltip: 'Edit Jadwal Rapat',
                     icon: const Icon(PhosphorIconsRegular.pencilSimple,
-                        size: 18, color: AppColors.primary),
+                        size: 16, color: AppColors.primary),
                     onPressed: onEditMeeting,
                   ),
                 ],
@@ -220,13 +236,17 @@ class MeetingCard extends StatelessWidget {
                 // Tombol Hapus Rapat jika Upcoming
                 if (type == MeetingCardType.upcoming &&
                     onDeleteMeeting != null) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   IconButton(
+                    visualDensity: VisualDensity.compact,
+                    constraints:
+                        const BoxConstraints(minWidth: 36, minHeight: 36),
+                    padding: const EdgeInsets.all(6),
                     style: IconButton.styleFrom(
                         backgroundColor: AppColors.statusMeetingBg),
                     tooltip: 'Batalkan Rapat',
                     icon: const Icon(PhosphorIconsRegular.trash,
-                        size: 18, color: AppColors.statusMeeting),
+                        size: 16, color: AppColors.statusMeeting),
                     onPressed: onDeleteMeeting,
                   ),
                 ],
