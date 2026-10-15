@@ -3,11 +3,11 @@ flutter_launcher_icons:
   ios: true
   image_path: assets/icons/zoom_monitor_app_icon.png
   remove_alpha_ios: true
-  adaptive_icon_background: "#0457DB"
+  adaptive_icon_background: "#183B36"
   adaptive_icon_foreground: assets/icons/zoom_monitor_adaptive_foreground.png
-  adaptive_icon_foreground_inset: 12
+  adaptive_icon_foreground_inset: 0
   web:
     generate: true
     image_path: assets/icons/zoom_monitor_app_icon.png
-    background_color: "#0457DB"
-    theme_color: "#0457DB"
+    background_color: "#183B36"
+    theme_color: "#183B36"

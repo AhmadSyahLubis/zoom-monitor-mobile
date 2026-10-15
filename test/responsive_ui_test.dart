@@ -2,11 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zoom_monitor_mobile/features/dashboard/data/models/dashboard_account.dart';
 import 'package:zoom_monitor_mobile/features/dashboard/presentation/widgets/account_card.dart';
+import 'package:zoom_monitor_mobile/features/dashboard/presentation/widgets/dashboard_hero.dart';
 import 'package:zoom_monitor_mobile/features/dashboard/presentation/widgets/stats_overview_bar.dart';
 import 'package:zoom_monitor_mobile/features/booking/data/models/schedule_item.dart';
 import 'package:zoom_monitor_mobile/features/booking/presentation/widgets/meeting_card.dart';
 
 void main() {
+  testWidgets('meeting search hero stays usable with enlarged text',
+      (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var searchTapped = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(2),
+          ),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              DashboardHero(
+                userName: 'Administrator Perusahaan',
+                onSearch: () => searchTapped = true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Cari waktu rapat'));
+    expect(searchTapped, isTrue);
+  });
+
   testWidgets('dashboard data fits a narrow screen with enlarged text',
       (tester) async {
     tester.view.physicalSize = const Size(320, 700);
@@ -54,7 +90,8 @@ void main() {
     expect(find.text('Siap dipakai'), findsOneWidget);
   });
 
-  testWidgets('meeting card actions and time fit narrow screen without overflow',
+  testWidgets(
+      'meeting card actions and time fit narrow screen without overflow',
       (tester) async {
     tester.view.physicalSize = const Size(320, 700);
     tester.view.devicePixelRatio = 1;

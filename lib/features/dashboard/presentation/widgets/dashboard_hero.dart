@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/date_time_util.dart';
 
 class DashboardHero extends StatelessWidget {
@@ -15,100 +16,36 @@ class DashboardHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0F2642),
-            Color(0xFF0A1B30),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: const Color(0xFF1E3A5F),
-          width: 1,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(21),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 252),
         child: Stack(
           children: [
-            // Telemetry radar rings watermark (matching the app icon brand motif)
-            Positioned(
-              right: -30,
-              bottom: -40,
-              child: SizedBox(
-                width: 220,
-                height: 220,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.05),
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.07),
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.09),
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      PhosphorIconsRegular.videoCamera,
-                      size: 38,
-                      color: Colors.white.withValues(alpha: 0.12),
-                    ),
-                    // Active pulse blip
-                    Positioned(
-                      top: 36,
-                      right: 48,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2ECC71).withValues(alpha: 0.8),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF2ECC71).withValues(alpha: 0.4),
-                              blurRadius: 6,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/meeting_workspace_hero.webp',
+                fit: BoxFit.cover,
+                alignment: Alignment.centerRight,
+              ),
+            ),
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      AppColors.primaryDark.withValues(alpha: 0.97),
+                      AppColors.primaryDark.withValues(alpha: 0.84),
+                      AppColors.primaryDark.withValues(alpha: 0.72),
+                    ],
+                  ),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(22, 22, 22, 24),
+              padding: const EdgeInsets.fromLTRB(22, 21, 22, 22),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -116,70 +53,68 @@ class DashboardHero extends StatelessWidget {
                     children: [
                       const Icon(
                         PhosphorIconsRegular.calendarBlank,
-                        size: 14,
-                        color: Color(0xFF94A3B8),
+                        size: 15,
+                        color: Color(0xFFE1EEE7),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        DateTimeUtil.formatDateOnlyWib(
-                          DateTime.now().toIso8601String(),
-                        ),
-                        style: const TextStyle(
-                          color: Color(0xFF94A3B8),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
+                      const SizedBox(width: 7),
+                      Flexible(
+                        child: Text(
+                          DateTimeUtil.formatDateOnlyWib(
+                            DateTime.now().toIso8601String(),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFFE1EEE7),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   Text(
                     '${DateTimeUtil.getGreeting()}, $userName',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 23,
                       height: 1.2,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: -0.3,
+                      letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 7),
                   const Text(
-                    'Cari akun Zoom yang tersedia untuk sesi rapat Anda.',
+                    'Temukan akun yang siap untuk rapat berikutnya.',
                     style: TextStyle(
-                      color: Color(0xFFCBD5E1),
+                      color: Color(0xFFE1EEE7),
                       fontSize: 13,
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  FilledButton.icon(
-                    onPressed: onSearch,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFFF1F5F9),
-                      foregroundColor: const Color(0xFF0F172A),
-                      minimumSize: const Size(0, 48),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
+                  const SizedBox(height: 21),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: onSearch,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFFF6F1E7),
+                        foregroundColor: AppColors.primaryDark,
+                        minimumSize: const Size.fromHeight(48),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    icon: const Icon(
-                      PhosphorIconsRegular.magnifyingGlass,
-                      size: 18,
-                    ),
-                    label: const Text(
-                      'Cari ketersediaan ruang',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                      icon: const Icon(PhosphorIconsRegular.magnifyingGlass,
+                          size: 18),
+                      label: const Text(
+                        'Cari waktu rapat',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),

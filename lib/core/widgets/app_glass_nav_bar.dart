@@ -70,12 +70,9 @@ class AppGlassNavBar extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.88),
+                  color: const Color(0xFFF9FAF7).withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(26),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 1,
-                  ),
+                  border: Border.all(color: AppColors.borderLight, width: 1),
                 ),
                 child: Row(
                   children: [

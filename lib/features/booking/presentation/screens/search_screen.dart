@@ -110,13 +110,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Pilih Waktu Pelaksanaan Rapat (WIB)',
+                    'Atur waktu rapat',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
                         color: AppColors.textMain),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Semua waktu mengikuti WIB.',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  ),
+                  const SizedBox(height: 18),
 
                   // Row Tanggal & Jam
                   Row(
@@ -217,25 +222,50 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           color: AppColors.textMuted),
                     ),
                     items: const [
-                      DropdownMenuItem(value: 15, child: Text('15 Menit', overflow: TextOverflow.ellipsis)),
-                      DropdownMenuItem(value: 30, child: Text('30 Menit', overflow: TextOverflow.ellipsis)),
-                      DropdownMenuItem(value: 45, child: Text('45 Menit', overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 60, child: Text('60 Menit (1 Jam)', overflow: TextOverflow.ellipsis)),
+                          value: 15,
+                          child: Text('15 Menit',
+                              overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 90, child: Text('90 Menit (1.5 Jam)', overflow: TextOverflow.ellipsis)),
+                          value: 30,
+                          child: Text('30 Menit',
+                              overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 120, child: Text('120 Menit (2 Jam)', overflow: TextOverflow.ellipsis)),
+                          value: 45,
+                          child: Text('45 Menit',
+                              overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 180, child: Text('180 Menit (3 Jam)', overflow: TextOverflow.ellipsis)),
+                          value: 60,
+                          child: Text('60 Menit (1 Jam)',
+                              overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 240, child: Text('240 Menit (4 Jam)', overflow: TextOverflow.ellipsis)),
+                          value: 90,
+                          child: Text('90 Menit (1.5 Jam)',
+                              overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 300, child: Text('300 Menit (5 Jam)', overflow: TextOverflow.ellipsis)),
+                          value: 120,
+                          child: Text('120 Menit (2 Jam)',
+                              overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 360, child: Text('360 Menit (6 Jam)', overflow: TextOverflow.ellipsis)),
+                          value: 180,
+                          child: Text('180 Menit (3 Jam)',
+                              overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem(
-                          value: 480, child: Text('480 Menit (8 Jam - Seharian)', overflow: TextOverflow.ellipsis)),
+                          value: 240,
+                          child: Text('240 Menit (4 Jam)',
+                              overflow: TextOverflow.ellipsis)),
+                      DropdownMenuItem(
+                          value: 300,
+                          child: Text('300 Menit (5 Jam)',
+                              overflow: TextOverflow.ellipsis)),
+                      DropdownMenuItem(
+                          value: 360,
+                          child: Text('360 Menit (6 Jam)',
+                              overflow: TextOverflow.ellipsis)),
+                      DropdownMenuItem(
+                          value: 480,
+                          child: Text('480 Menit (8 Jam - Seharian)',
+                              overflow: TextOverflow.ellipsis)),
                     ],
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedDuration = val);
@@ -245,6 +275,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
                   // Tombol Cek Ketersediaan
                   ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                    ),
                     onPressed: () {
                       setState(() {
                         _hasSearched = true;

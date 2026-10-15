@@ -146,37 +146,26 @@ class AccountsScreen extends ConsumerWidget {
   }
 
   Widget _buildAccountsHeader(int count) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark,
-        borderRadius: BorderRadius.circular(22),
-      ),
+    return ContentSurface(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Akun premium, satu kendali.',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 21,
-              height: 1.25,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Pantau koneksi dan kelola akses tiap akun.',
-            style: TextStyle(color: Color(0xFFD6E5E4), fontSize: 13),
-          ),
-          const SizedBox(height: 20),
           Text(
             '$count akun terhubung',
             style: const TextStyle(
-              color: Color(0xFFA7DECF),
-              fontSize: 13,
+              color: AppColors.textMain,
+              fontSize: 22,
               fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            'Kelola koneksi dan akses Zoom Premium dari satu tempat.',
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 13,
+              height: 1.45,
             ),
           ),
         ],
@@ -201,7 +190,7 @@ class AccountsScreen extends ConsumerWidget {
                     color: AppColors.primaryLight,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(PhosphorIconsFill.videoCamera,
+                  child: const Icon(PhosphorIconsRegular.usersThree,
                       color: AppColors.primary, size: 22),
                 ),
                 const SizedBox(width: 12),
@@ -211,15 +200,23 @@ class AccountsScreen extends ConsumerWidget {
                     children: [
                       Text(
                         account.accountName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textMain),
                       ),
                       if (account.email != null && account.email!.isNotEmpty)
-                        Text(account.email!,
-                            style: const TextStyle(
-                                fontSize: 12, color: AppColors.textMuted)),
+                        Text(
+                          account.email!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -240,16 +237,39 @@ class AccountsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
 
-            // Metadata Chips
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
+            Row(
               children: [
-                _buildInfoBadge('Account ID: ${account.zoomAccountId}'),
-                _buildInfoBadge('Client ID: ${account.clientId}'),
-                if (account.hostKey != null && account.hostKey!.isNotEmpty)
-                  _buildInfoBadge('Host Key: ${account.hostKey}',
-                      isHighlight: true),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: account.isActive
+                        ? AppColors.statusAvailable
+                        : AppColors.statusError,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  account.isActive ? 'Aktif' : 'Nonaktif',
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'ID ${account.zoomAccountId}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
               ],
             ),
 
@@ -271,28 +291,6 @@ class AccountsScreen extends ConsumerWidget {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoBadge(String text, {bool isHighlight = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isHighlight ? AppColors.primaryLight : AppColors.scaffoldLight,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-            color: isHighlight
-                ? AppColors.primary.withValues(alpha: 0.3)
-                : AppColors.borderLight),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: isHighlight ? FontWeight.bold : FontWeight.w500,
-          color: isHighlight ? AppColors.primaryDark : AppColors.textMain,
         ),
       ),
     );

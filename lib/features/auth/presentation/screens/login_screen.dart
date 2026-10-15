@@ -167,58 +167,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440),
               child: ContentSurface(
-                padding: const EdgeInsets.all(24),
-                radius: 30,
+                padding: const EdgeInsets.all(22),
+                radius: 24,
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Center(
-                        child: Container(
-                          width: 72,
-                          height: 72,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF0457DB).withValues(alpha: 0.22),
-                                blurRadius: 20,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
+                      Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(13),
                             child: Image.asset(
                               'assets/icons/zoom_monitor_app_icon.png',
+                              width: 54,
+                              height: 54,
                               fit: BoxFit.cover,
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'Zoom Monitor',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textMain,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 21),
+                      const SizedBox(height: 30),
                       const Text(
-                        'Zoom Monitor',
-                        textAlign: TextAlign.center,
+                        'Masuk ke ruang kerja',
                         style: TextStyle(
                           fontSize: 25,
-                          fontWeight: FontWeight.bold,
+                          height: 1.2,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.textMain,
-                          letterSpacing: -0.5,
+                          letterSpacing: -0.6,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       const Text(
-                        'Kelola akun dan jadwal rapat perusahaan.',
-                        textAlign: TextAlign.center,
+                        'Akses akun dan jadwal rapat perusahaan.',
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.textMuted,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 28),
 
                       // Error Banner jika ada
                       if (authState.errorMessage != null) ...[
@@ -323,49 +322,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Device Identifier Info Badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.48),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.borderLight),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(PhosphorIconsRegular.deviceMobile,
-                                size: 18, color: AppColors.textMuted),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Perangkat: $_deviceName',
-                                style: const TextStyle(
-                                    fontSize: 12, color: AppColors.textMuted),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                      const Divider(height: 1),
+                      const SizedBox(height: 13),
+                      Row(
+                        children: [
+                          const Icon(PhosphorIconsRegular.deviceMobile,
+                              size: 17, color: AppColors.textMuted),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Perangkat: $_deviceName',
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.textMuted),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
 
-                      // Server Host URL Badge (Dapat diubah)
                       InkWell(
                         onTap: _showServerConfigDialog,
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.48),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: AppColors.borderLight),
-                          ),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 7),
                           child: Row(
                             children: [
                               const Icon(PhosphorIconsRegular.hardDrives,
-                                  size: 18, color: AppColors.primary),
+                                  size: 17, color: AppColors.primary),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(

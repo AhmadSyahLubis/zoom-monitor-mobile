@@ -65,6 +65,23 @@ class StatsOverviewBar extends StatelessWidget {
               ),
             ],
           ),
+          if (totalAccounts > 0) ...[
+            const SizedBox(height: 18),
+            Semantics(
+              label: '$availableAccounts dari $totalAccounts akun siap dipakai',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: availableAccounts / totalAccounts,
+                  minHeight: 7,
+                  backgroundColor: AppColors.primaryLight,
+                  valueColor: const AlwaysStoppedAnimation<Color>(
+                    AppColors.statusAvailable,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

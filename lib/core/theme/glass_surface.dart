@@ -69,7 +69,7 @@ class GlassAppBarBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAF8),
+        color: AppColors.scaffoldLight,
         border: Border(
           bottom: BorderSide(
             color: AppColors.borderLight.withValues(alpha: 0.8),

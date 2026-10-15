@@ -54,11 +54,8 @@ class _RecordingsScreenState extends ConsumerState<RecordingsScreen> {
       ),
       body: Column(
         children: [
-          // Search & Filter Bar
-          ContentSurface(
-            radius: 18,
-            margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            padding: const EdgeInsets.all(8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: TextField(
               controller: _searchController,
               onChanged: _onSearchChanged,
