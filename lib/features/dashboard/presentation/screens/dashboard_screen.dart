@@ -56,27 +56,14 @@ class DashboardScreen extends ConsumerWidget {
         ),
         actions: [
           GlassIconButton(
-            icon: PhosphorIconsRegular.magnifyingGlass,
-            tooltip: 'Cari akun tersedia',
-            onPressed: () => context.push(AppRoutes.search),
+            icon: PhosphorIconsRegular.fingerprint,
+            tooltip: 'Keamanan & biometrik',
+            onPressed: () => _showSecurityModal(context, ref),
           ),
-          PopupMenuButton<String>(
-            tooltip: 'Menu akun',
-            icon: const Icon(PhosphorIconsRegular.dotsThree, size: 23),
-            onSelected: (action) async {
-              if (action == 'security') {
-                _showSecurityModal(context, ref);
-              } else if (action == 'logout') {
-                await _logout(context, ref);
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: 'security',
-                child: Text('Keamanan & biometrik'),
-              ),
-              PopupMenuItem(value: 'logout', child: Text('Keluar')),
-            ],
+          GlassIconButton(
+            icon: PhosphorIconsRegular.signOut,
+            tooltip: 'Keluar',
+            onPressed: () => _logout(context, ref),
           ),
         ],
       ),

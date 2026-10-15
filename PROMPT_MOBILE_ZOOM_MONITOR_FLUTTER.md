@@ -54,7 +54,7 @@ API memakai base path `/api/v1`. Nilai bawaan di `lib/core/config/app_config.dar
 | `/accounts` | Daftar akun Zoom, status aktif, uji koneksi, tambah, edit, hapus |
 | `/accounts/form` | Form tambah atau edit akun Zoom S2S OAuth |
 
-Lima rute dari `/dashboard` sampai `/accounts` muncul di bottom navigation. Splash, login, PIN, dan form akun bukan tab baru. Beranda memiliki menu **Keamanan & biometrik** dan **Keluar**.
+Lima rute dari `/dashboard` sampai `/accounts` muncul di bottom navigation. Splash, login, PIN, dan form akun bukan tab baru. Top bar Beranda menampilkan ikon **Keamanan & biometrik** dan **Keluar** secara langsung, masing-masing dengan tooltip dan aksi yang sudah ada.
 
 ### Data yang menentukan isi layar
 
