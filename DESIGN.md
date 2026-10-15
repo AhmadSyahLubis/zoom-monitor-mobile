@@ -1,13 +1,43 @@
 # Zoom Monitor visual direction
 
-Zoom Monitor is a mobile workspace for administrators coordinating company Zoom Premium accounts, availability, bookings, and recordings.
+Zoom Monitor is a mobile operations app for coordinating company Zoom Premium accounts, bookings, schedules, and recordings. Its identity belongs to the internal product, not to Zoom.
 
-- Character: composed, precise, and welcoming. The interface should feel like an operations tool used every day, not a marketing page.
-- Palette: warm paper (#F5F4EF), deep pine (#183B36), ivory (#F6F1E7), and a mint availability accent (#A9DBC1). Meeting and warning colors carry status only.
-- Brand motif: two offset rounded windows represent multiple account spaces viewed from one place. The mint window identifies available capacity. It replaces the camera/radar metaphor and repeats in the launcher, login, splash, and app bar.
-- Typography: Plus Jakarta Sans gives Indonesian labels clear, compact shapes. Strong headings and quiet supporting text establish order without oversized display type.
-- Imagery: one candid meeting-room image gives the dashboard human context. Account, schedule, and recording screens prioritize actual data; there are no decorative illustrations or invented figures.
-- Surfaces: paper-colored background, solid content panels, and a single frosted bottom navigation layer. The transparency signals persistent navigation above scrolling content.
-- Interaction: Material 3 controls, clear 44px or larger targets, restrained 200ms state changes. Energy 2, rhythm 2, motion 1.
+## Character and hierarchy
 
-Reference principles: Apple Human Interface Guidelines for app icons, tab bars, and materials; Flutter Material 3 for accessible cross-platform controls. We use the principles, not another product's visual identity.
+- Calm, precise, corporate. Data and actions lead; decoration supports them.
+- Inter is the single UI typeface, bundled in `assets/fonts`. Its text shapes suit dense mobile controls; weight and spacing distinguish titles from data and actions. Keep Indonesian labels short and readable.
+- Portrait phone layouts should work from 360 px. Primary tap targets are at least 44 px; content clears the floating navigation and safe areas.
+
+## Palette
+
+| Role | Color | Use |
+|---|---|---|
+| Navy | `#182640` | App icon, dark hero, strong text |
+| Slate blue | `#2B4C86` | Primary actions and focus |
+| Soft blue | `#E8EEFA` | Selected navigation and quiet emphasis |
+| Canvas | `#EEF2F7` | Screen background |
+| White | `#FFFFFF` | Cards, forms, dialogs |
+| Ink | `#1A283B` | Main copy |
+| Muted | `#586779` | Supporting copy |
+| Border | `#DCE3EC` | Card and field structure |
+
+Semantic states retain separate text and background colors in `lib/core/theme/app_colors.dart`. Availability uses restrained teal, active meeting muted red, and scheduled muted amber. Always pair color with a written state.
+
+## Brand and icons
+
+The launcher icon is a custom **M** monogram in off-white and pale blue on navy. A small circular aperture at its central joint hints at a camera lens without tracing Zoom's silhouette. `tool/design_assets/zoom_monitor_mark.svg` is the editable source; `tool/generate_brand_icon.py` exports the 1024 px assets, and `flutter_launcher_icons.yaml` builds platform variants. Keep the mark centered and legible at small sizes.
+
+The five bottom navigation symbols are custom 24 px drawings with the same 1.8 px stroke, rounded ends, and labels. Other action icons can use the existing Phosphor set at one consistent weight. Do not add novelty symbols or decorative badges.
+
+## Surfaces and assets
+
+- The bottom navigation is the single persistent frosted layer. Its blur, white rim, and navy shadow should remain subtle. Content cards and forms are solid white.
+- Dashboard and login use meeting imagery; Search, Schedules, Recordings, and Accounts each use one compact editorial banner relevant to the page. The photo sits behind a navy legibility layer and never replaces operational data. Generation prompts are recorded in `assets/images/ASSET_SOURCES.md`.
+- Data cards remain opaque and scannable. Search leads with availability, schedules lead with date and topic, recordings group playback metadata, and accounts group connection status with account ID. Radius is 10–20 px by component role; the floating navigation uses 26 px. Shadows stay subtle.
+- Motion is brief and functional, around 200 ms. Loading, empty, error, and success states need useful text and actions.
+
+## Product truth
+
+The backend currently runs on a local network. Do not imply internet-wide availability, enterprise guarantees, encryption claims, cloud capacity, auto-generated passcodes, or features unsupported by the API. Mockups must label sample data. Design actions must follow the existing Flutter routes and repositories.
+
+Reference principles: [Apple HIG Materials](https://developer.apple.com/design/human-interface-guidelines/materials), [App icons](https://developer.apple.com/design/human-interface-guidelines/app-icons/), and [Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars/). The visual language is implemented with Flutter controls, without copying iOS screens.

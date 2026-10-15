@@ -174,39 +174,71 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(13),
-                            child: Image.asset(
-                              'assets/icons/zoom_monitor_app_icon.png',
-                              width: 54,
-                              height: 54,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Text(
-                              'Zoom Monitor',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textMain,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: SizedBox(
+                          height: 150,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.asset(
+                                'assets/images/hybrid_desk_login.png',
+                                fit: BoxFit.cover,
+                                alignment: Alignment.centerRight,
+                                excludeFromSemantics: true,
                               ),
-                            ),
+                              const DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomLeft,
+                                    end: Alignment.topRight,
+                                    colors: [
+                                      Color(0xD9182640),
+                                      Colors.transparent
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: 15,
+                                bottom: 15,
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(9),
+                                      child: Image.asset(
+                                        'assets/icons/zoom_monitor_app_icon.png',
+                                        width: 36,
+                                        height: 36,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 9),
+                                    const Text(
+                                      'Zoom Monitor',
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 24),
                       const Text(
-                        'Masuk ke ruang kerja',
+                        'Masuk ke akun Anda',
                         style: TextStyle(
-                          fontSize: 25,
-                          height: 1.2,
-                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Inter',
+                          fontSize: 27,
+                          height: 1.12,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.textMain,
-                          letterSpacing: -0.6,
+                          letterSpacing: -0.8,
                         ),
                       ),
                       const SizedBox(height: 8),

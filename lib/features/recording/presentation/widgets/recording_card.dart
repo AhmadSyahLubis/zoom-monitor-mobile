@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_type.dart';
 import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/utils/date_time_util.dart';
 import '../../../../core/utils/ui_feedback.dart';
+import '../../../../core/widgets/app_nav_symbol.dart';
 import '../../data/models/recording_item.dart';
 
 class RecordingCard extends StatelessWidget {
-  final RecordingItem recording;
-
   const RecordingCard({super.key, required this.recording});
+
+  final RecordingItem recording;
 
   String get _targetPlayUrl {
     if (recording.shareUrl.isNotEmpty) return recording.shareUrl;
@@ -20,6 +23,29 @@ class RecordingCard extends StatelessWidget {
       return recording.recordingFiles.first.playUrl;
     }
     return '';
+  }
+
+  Future<void> _openRecording(BuildContext context) async {
+    final url = _targetPlayUrl;
+    if (url.isEmpty) {
+      UiFeedback.showError(context, 'Link pemutaran rekaman tidak tersedia');
+      return;
+    }
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else if (context.mounted) {
+      UiFeedback.showError(context, 'Tidak dapat membuka tautan rekaman');
+    }
+  }
+
+  void _shareRecording(BuildContext context) {
+    final url = _targetPlayUrl;
+    if (url.isEmpty) {
+      UiFeedback.showError(context, 'Tautan tidak tersedia untuk dibagikan');
+      return;
+    }
+    Share.share('Rekaman Zoom: ${recording.topic}\nTautan: $url');
   }
 
   @override
@@ -31,160 +57,124 @@ class RecordingCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top: Akun & File Count
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: const Center(
+                    child: AppNavSymbol(
+                      kind: AppNavSymbolKind.recordings,
+                      color: AppColors.primaryDark,
+                      size: 25,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(PhosphorIconsFill.cloudCheck,
-                            color: AppColors.primary, size: 16),
+                      Text(
+                        recording.topic,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppType.cardTitle,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          recording.accountName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textMuted),
+                      const SizedBox(height: 5),
+                      Text(
+                        recording.accountName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.scaffoldLight,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.borderLight),
-                  ),
-                  child: Text(
-                    '${recording.recordingFiles.length} File',
-                    style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textMuted),
-                  ),
-                ),
               ],
             ),
-            const SizedBox(height: 10),
-
-            // Topik Rekaman
-            Text(
-              recording.topic,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textMain,
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(12, 11, 12, 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF6F8FC),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'DIREKAM PADA',
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateTimeUtil.formatWib(recording.startTime),
+                    style: const TextStyle(
+                      color: AppColors.textMain,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Divider(height: 1),
+                  const SizedBox(height: 9),
+                  LayoutBuilder(
+                    builder: (context, constraints) => Wrap(
+                      spacing: 12,
+                      runSpacing: 7,
+                      children: [
+                        _detail(
+                            PhosphorIconsRegular.timer,
+                            '${recording.duration} menit',
+                            constraints.maxWidth),
+                        _detail(PhosphorIconsRegular.database,
+                            recording.formattedTotalSize, constraints.maxWidth),
+                        if (recording.hostName.isNotEmpty)
+                          _detail(PhosphorIconsRegular.user, recording.hostName,
+                              constraints.maxWidth),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 6),
-
-            // Waktu Rapat
-            Row(
-              children: [
-                const Icon(PhosphorIconsRegular.clock,
-                    size: 14, color: AppColors.textMuted),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    DateTimeUtil.formatWib(recording.startTime),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textMuted),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Specs: Durasi, Ukuran File Total, Host
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: [
-                _buildChip(
-                    PhosphorIconsRegular.timer, '${recording.duration} Menit'),
-                _buildChip(PhosphorIconsRegular.database,
-                    recording.formattedTotalSize),
-                if (recording.hostName.isNotEmpty)
-                  _buildChip(PhosphorIconsRegular.user, recording.hostName),
-              ],
-            ),
-
             const SizedBox(height: 14),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-
-            // Tombol Putar & Bagikan
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
+                  child: FilledButton.icon(
+                    onPressed: () => _openRecording(context),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 44),
                     ),
-                    onPressed: () async {
-                      final url = _targetPlayUrl;
-                      if (url.isNotEmpty) {
-                        final uri = Uri.parse(url);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri,
-                              mode: LaunchMode.externalApplication);
-                        } else {
-                          if (context.mounted) {
-                            UiFeedback.showError(
-                                context, 'Tidak dapat membuka tautan rekaman');
-                          }
-                        }
-                      } else {
-                        UiFeedback.showError(
-                            context, 'Link pemutaran rekaman tidak tersedia');
-                      }
-                    },
-                    icon: const Icon(PhosphorIconsFill.playCircle,
-                        size: 18, color: Colors.white),
-                    label: const Text(
-                      'Putar Rekaman',
-                      style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
+                    icon: const Icon(PhosphorIconsRegular.play, size: 17),
+                    label: const Text('Putar rekaman'),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 IconButton.outlined(
-                  tooltip: 'Bagikan Link',
+                  tooltip: 'Bagikan tautan',
+                  constraints:
+                      const BoxConstraints(minWidth: 44, minHeight: 44),
                   icon: const Icon(PhosphorIconsRegular.shareNetwork,
-                      size: 18, color: AppColors.primary),
-                  onPressed: () {
-                    final url = _targetPlayUrl;
-                    if (url.isNotEmpty) {
-                      Share.share(
-                          'Rekaman Zoom: ${recording.topic}\nTautan: $url');
-                    } else {
-                      UiFeedback.showError(
-                          context, 'Tautan tidak tersedia untuk dibagikan');
-                    }
-                  },
+                      size: 19, color: AppColors.primary),
+                  onPressed: () => _shareRecording(context),
                 ),
               ],
             ),
@@ -194,23 +184,26 @@ class RecordingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildChip(IconData icon, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.scaffoldLight,
-        borderRadius: BorderRadius.circular(8),
-      ),
+  Widget _detail(IconData icon, String text, double maxWidth) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: AppColors.textMuted),
-          const SizedBox(width: 4),
-          Text(text,
+          Icon(icon, size: 14, color: AppColors.textMuted),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.textMain,
-                  fontWeight: FontWeight.w500)),
+                color: AppColors.textMain,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

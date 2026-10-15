@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_type.dart';
 import '../../../../core/theme/glass_surface.dart';
 
 class StatsOverviewBar extends StatelessWidget {
@@ -21,31 +22,21 @@ class StatsOverviewBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 12,
-            runSpacing: 4,
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              const Text(
-                'Ketersediaan akun',
-                style: TextStyle(
-                  color: AppColors.textMain,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                '$totalAccounts terhubung',
-                style: const TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          const Text(
+            'RINGKASAN AKUN',
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
+          Text(
+            '$totalAccounts akun',
+            style: AppType.metric,
+          ),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -53,35 +44,20 @@ class StatsOverviewBar extends StatelessWidget {
                   value: availableAccounts,
                   label: 'Siap dipakai',
                   color: AppColors.statusAvailable,
+                  background: AppColors.statusAvailableBg,
                 ),
               ),
-              Container(width: 1, height: 44, color: AppColors.borderLight),
+              const SizedBox(width: 9),
               Expanded(
                 child: _Metric(
                   value: busyAccounts,
                   label: 'Sedang rapat',
-                  color: AppColors.textMain,
+                  color: AppColors.statusMeeting,
+                  background: AppColors.statusMeetingBg,
                 ),
               ),
             ],
           ),
-          if (totalAccounts > 0) ...[
-            const SizedBox(height: 18),
-            Semantics(
-              label: '$availableAccounts dari $totalAccounts akun siap dipakai',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: availableAccounts / totalAccounts,
-                  minHeight: 7,
-                  backgroundColor: AppColors.primaryLight,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    AppColors.statusAvailable,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -89,35 +65,46 @@ class StatsOverviewBar extends StatelessWidget {
 }
 
 class _Metric extends StatelessWidget {
-  const _Metric(
-      {required this.value, required this.label, required this.color});
+  const _Metric({
+    required this.value,
+    required this.label,
+    required this.color,
+    required this.background,
+  });
 
   final int value;
   final String label;
   final Color color;
+  final Color background;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      constraints: const BoxConstraints(minHeight: 58),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(11),
+      ),
+      child: Row(
         children: [
-          Text(
-            '$value',
-            style: TextStyle(
-              fontSize: 29,
-              height: 1,
-              fontWeight: FontWeight.w700,
-              color: color,
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: AppColors.textMain, fontSize: 12),
             ),
           ),
-          const SizedBox(height: 6),
           Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+            '$value',
+            style: AppType.cardTitle.copyWith(color: color),
           ),
         ],
       ),

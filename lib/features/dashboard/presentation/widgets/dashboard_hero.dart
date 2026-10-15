@@ -3,6 +3,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/date_time_util.dart';
+import '../../../../core/widgets/app_nav_symbol.dart';
 
 class DashboardHero extends StatelessWidget {
   const DashboardHero({
@@ -24,7 +25,7 @@ class DashboardHero extends StatelessWidget {
           children: [
             Positioned.fill(
               child: Image.asset(
-                'assets/images/meeting_workspace_hero.webp',
+                'assets/images/meeting_console_hero.png',
                 fit: BoxFit.cover,
                 alignment: Alignment.centerRight,
               ),
@@ -36,9 +37,9 @@ class DashboardHero extends StatelessWidget {
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                     colors: [
-                      AppColors.primaryDark.withValues(alpha: 0.97),
-                      AppColors.primaryDark.withValues(alpha: 0.84),
-                      AppColors.primaryDark.withValues(alpha: 0.72),
+                      AppColors.primaryDark.withValues(alpha: 0.92),
+                      AppColors.primaryDark.withValues(alpha: 0.66),
+                      AppColors.primaryDark.withValues(alpha: 0.28),
                     ],
                   ),
                 ),
@@ -54,7 +55,7 @@ class DashboardHero extends StatelessWidget {
                       const Icon(
                         PhosphorIconsRegular.calendarBlank,
                         size: 15,
-                        color: Color(0xFFE1EEE7),
+                        color: Color(0xFFDDE7F6),
                       ),
                       const SizedBox(width: 7),
                       Flexible(
@@ -65,7 +66,7 @@ class DashboardHero extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Color(0xFFE1EEE7),
+                            color: Color(0xFFDDE7F6),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -79,18 +80,19 @@ class DashboardHero extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
+                      fontFamily: 'Inter',
                       color: Colors.white,
-                      fontSize: 23,
-                      height: 1.2,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.5,
+                      fontSize: 25,
+                      height: 1.12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.8,
                     ),
                   ),
                   const SizedBox(height: 7),
                   const Text(
                     'Temukan akun yang siap untuk rapat berikutnya.',
                     style: TextStyle(
-                      color: Color(0xFFE1EEE7),
+                      color: Color(0xFFDDE7F6),
                       fontSize: 13,
                       height: 1.4,
                     ),
@@ -101,7 +103,7 @@ class DashboardHero extends StatelessWidget {
                     child: FilledButton.icon(
                       onPressed: onSearch,
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFFF6F1E7),
+                        backgroundColor: const Color(0xFFF5F8FE),
                         foregroundColor: AppColors.primaryDark,
                         minimumSize: const Size.fromHeight(48),
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -109,8 +111,11 @@ class DashboardHero extends StatelessWidget {
                           borderRadius: BorderRadius.circular(13),
                         ),
                       ),
-                      icon: const Icon(PhosphorIconsRegular.magnifyingGlass,
-                          size: 18),
+                      icon: const AppNavSymbol(
+                        kind: AppNavSymbolKind.search,
+                        color: AppColors.primaryDark,
+                        size: 18,
+                      ),
                       label: const Text(
                         'Cari waktu rapat',
                         style: TextStyle(

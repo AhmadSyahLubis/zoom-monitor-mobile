@@ -136,8 +136,8 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
-                        labelText: 'Nama Akun / Ruangan *',
-                        hintText: 'Contoh: Ruang Rapat Direksi',
+                        labelText: 'Nama akun Zoom *',
+                        hintText: 'Contoh: Akun Rapat Direksi',
                       ),
                       validator: (v) => v == null || v.trim().isEmpty
                           ? 'Nama akun wajib diisi'

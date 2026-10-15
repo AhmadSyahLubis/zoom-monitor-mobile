@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/glass_surface.dart';
+import '../../../../core/theme/app_type.dart';
 import '../../../../core/utils/date_time_util.dart';
 import '../../../../core/widgets/app_glass_nav_bar.dart';
+import '../../../../core/widgets/section_photo_banner.dart';
 import '../../data/models/availability_result.dart';
 import '../controllers/booking_controller.dart';
 import '../widgets/booking_dialog.dart';
@@ -37,6 +39,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String get _formattedDate => DateFormat('yyyy-MM-dd').format(_selectedDate);
   String get _formattedTime =>
       '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}';
+
+  void _setQuickDate(int daysFromToday) {
+    final nowWib = DateTime.now().toUtc().add(const Duration(hours: 7));
+    setState(() {
+      _selectedDate = DateTime(nowWib.year, nowWib.month, nowWib.day)
+          .add(Duration(days: daysFromToday));
+    });
+  }
+
+  bool _isQuickDate(int daysFromToday) {
+    final nowWib = DateTime.now().toUtc().add(const Duration(hours: 7));
+    final date = DateTime(nowWib.year, nowWib.month, nowWib.day)
+        .add(Duration(days: daysFromToday));
+    return _selectedDate.year == date.year &&
+        _selectedDate.month == date.month &&
+        _selectedDate.day == date.day;
+  }
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
@@ -103,6 +122,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SectionPhotoBanner(
+              asset: 'assets/images/search_availability.png',
+              title: 'Cari slot kosong',
+              subtitle: 'Periksa akun yang siap untuk rapat Anda.',
+            ),
+            const SizedBox(height: 16),
             // Filter Form Card
             ContentSurface(
               padding: const EdgeInsets.all(16),
@@ -111,10 +136,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 children: [
                   const Text(
                     'Atur waktu rapat',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                        color: AppColors.textMain),
+                    style: AppType.section,
                   ),
                   const SizedBox(height: 4),
                   const Text(
@@ -122,6 +144,33 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                   ),
                   const SizedBox(height: 18),
+
+                  const Text(
+                    'Tanggal rapat',
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Hari ini'),
+                        selected: _isQuickDate(0),
+                        onSelected: (_) => _setQuickDate(0),
+                      ),
+                      ChoiceChip(
+                        label: const Text('Besok'),
+                        selected: _isQuickDate(1),
+                        onSelected: (_) => _setQuickDate(1),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
 
                   // Row Tanggal & Jam
                   Row(
@@ -211,6 +260,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ],
                   ),
                   const SizedBox(height: 14),
+
+                  const Text(
+                    'Durasi cepat',
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      for (final minutes in [30, 45, 60, 120])
+                        ChoiceChip(
+                          label: Text('$minutes mnt'),
+                          selected: _selectedDuration == minutes,
+                          onSelected: (_) =>
+                              setState(() => _selectedDuration = minutes),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
 
                   // Dropdown Durasi
                   DropdownButtonFormField<int>(
@@ -305,7 +378,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         size: 48, color: AppColors.textMuted),
                     SizedBox(height: 12),
                     Text(
-                      'Pilih waktu rapat dan tekan tombol Cek Ketersediaan untuk melihat akun yang kosong.',
+                      'Pilih waktu rapat dan tekan Cek ketersediaan untuk melihat akun yang siap dipakai.',
                       textAlign: TextAlign.center,
                       style:
                           TextStyle(color: AppColors.textMuted, fontSize: 13),
@@ -343,7 +416,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       // Akun Tersedia
                       if (available.isNotEmpty) ...[
                         Text(
-                          'Ruang Tersedia (${available.length})',
+                          'Akun tersedia (${available.length})',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -359,7 +432,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       // Akun Benturan
                       if (busy.isNotEmpty) ...[
                         Text(
-                          'Ruang Terisi / Benturan Jadwal (${busy.length})',
+                          'Akun belum tersedia (${busy.length})',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -414,6 +487,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _buildResultCard(AvailabilityResult result,
       {required bool isAvailable}) {
+    final isError = result.status == 'ERROR';
+    final statusColor = isAvailable
+        ? AppColors.statusAvailable
+        : isError
+            ? AppColors.statusError
+            : AppColors.statusMeeting;
     return RepaintBoundary(
       child: ContentSurface(
         margin: const EdgeInsets.only(bottom: 12),
@@ -424,52 +503,64 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     color: isAvailable
                         ? AppColors.statusAvailableBg
-                        : AppColors.statusMeetingBg,
-                    borderRadius: BorderRadius.circular(10),
+                        : isError
+                            ? AppColors.statusErrorBg
+                            : AppColors.statusMeetingBg,
+                    borderRadius: BorderRadius.circular(11),
                   ),
                   child: Icon(
                     isAvailable
                         ? PhosphorIconsFill.checkCircle
-                        : PhosphorIconsFill.xCircle,
-                    color: isAvailable
-                        ? AppColors.statusAvailable
-                        : AppColors.statusMeeting,
+                        : isError
+                            ? PhosphorIconsRegular.warningCircle
+                            : PhosphorIconsFill.xCircle,
+                    color: statusColor,
                     size: 20,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        result.account.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: AppColors.textMain),
-                      ),
-                      if (result.email.isNotEmpty)
-                        Text(
-                          result.email,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                    ],
+                  child: Text(
+                    isAvailable
+                        ? 'Siap dipakai'
+                        : isError
+                            ? 'Belum dapat diperiksa'
+                            : result.conflictingMeeting != null
+                                ? 'Jadwal bentrok'
+                                : 'Sedang dipakai',
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 13),
+            Text(
+              result.account.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppType.cardTitle.copyWith(fontSize: 18),
+            ),
+            if (result.email.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                result.email,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
 
             // Detail konflik jika ada
             if (!isAvailable && result.conflictingMeeting != null) ...[
@@ -485,8 +576,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   backgroundColor:
                       isAvailable ? AppColors.primary : AppColors.statusMeeting,
                 ),
-                onPressed: () => _openBookingSheet(result),
-                child: Text(isAvailable ? 'Booking' : 'Paksa booking'),
+                onPressed: isError ? null : () => _openBookingSheet(result),
+                child: Text(isAvailable
+                    ? 'Booking akun'
+                    : isError
+                        ? 'Tidak dapat dibooking'
+                        : 'Paksa booking'),
               ),
             ),
           ],

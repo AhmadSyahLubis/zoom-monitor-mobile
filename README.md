@@ -68,7 +68,7 @@
 | **Networking** | [Dio](https://pub.dev/packages/dio) (v5.4) with custom cache & auth interceptors |
 | **Local Storage** | [FlutterSecureStorage](https://pub.dev/packages/flutter_secure_storage) & [SharedPreferences](https://pub.dev/packages/shared_preferences) |
 | **Biometric Auth** | [Local Auth](https://pub.dev/packages/local_auth) & [Device Info Plus](https://pub.dev/packages/device_info_plus) |
-| **Icons & Typography** | [Phosphor Icons](https://pub.dev/packages/phosphor_icons) & [Google Fonts (Inter)](https://pub.dev/packages/google_fonts) |
+| **Icons & Typography** | Custom navigation and launcher icons, [Phosphor Icons](https://pub.dev/packages/phosphor_icons), bundled [Inter](https://rsms.me/inter/) font |
 
 ---
 

@@ -5,10 +5,13 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 import '../../../../core/config/app_routes.dart';
 import '../../../../core/network/api_cache_manager.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_type.dart';
 import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/utils/ui_feedback.dart';
 import '../../../../core/widgets/app_glass_nav_bar.dart';
+import '../../../../core/widgets/app_nav_symbol.dart';
 import '../../../../core/widgets/load_error_state.dart';
+import '../../../../core/widgets/section_photo_banner.dart';
 import '../../data/models/zoom_account.dart';
 import '../controllers/account_controller.dart';
 import '../widgets/test_connection_dialog.dart';
@@ -146,30 +149,10 @@ class AccountsScreen extends ConsumerWidget {
   }
 
   Widget _buildAccountsHeader(int count) {
-    return ContentSurface(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$count akun terhubung',
-            style: const TextStyle(
-              color: AppColors.textMain,
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 5),
-          const Text(
-            'Kelola koneksi dan akses Zoom Premium dari satu tempat.',
-            style: TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 13,
-              height: 1.45,
-            ),
-          ),
-        ],
-      ),
+    return SectionPhotoBanner(
+      asset: 'assets/images/accounts_workstation.png',
+      title: 'Akun perusahaan',
+      subtitle: '$count akun terhubung · Kelola koneksi dan aksesnya.',
     );
   }
 
@@ -190,8 +173,10 @@ class AccountsScreen extends ConsumerWidget {
                     color: AppColors.primaryLight,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(PhosphorIconsRegular.usersThree,
-                      color: AppColors.primary, size: 22),
+                  child: const AppNavSymbol(
+                    kind: AppNavSymbolKind.accounts,
+                    color: AppColors.primary,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -202,10 +187,7 @@ class AccountsScreen extends ConsumerWidget {
                         account.accountName,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textMain),
+                        style: AppType.cardTitle,
                       ),
                       if (account.email != null && account.email!.isNotEmpty)
                         Text(
@@ -235,60 +217,69 @@ class AccountsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: account.isActive
-                        ? AppColors.statusAvailable
-                        : AppColors.statusError,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 7),
-                Text(
-                  account.isActive ? 'Aktif' : 'Nonaktif',
-                  style: const TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'ID ${account.zoomAccountId}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 12,
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F8FC),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: account.isActive
+                          ? AppColors.statusAvailable
+                          : AppColors.statusError,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 14),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
-
-            // Tombol Uji Koneksi S2S
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                side: const BorderSide(color: AppColors.primary),
+                  const SizedBox(width: 7),
+                  Text(
+                    account.isActive ? 'Aktif' : 'Nonaktif',
+                    style: TextStyle(
+                      color: account.isActive
+                          ? AppColors.statusAvailable
+                          : AppColors.statusError,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'ID ${account.zoomAccountId}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              onPressed: () => _handleTestConnection(context, ref, account),
-              icon: const Icon(PhosphorIconsRegular.plugsConnected,
-                  size: 18, color: AppColors.primary),
-              label: const Text('Uji Koneksi Zoom S2S',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(44),
+                  side: const BorderSide(color: AppColors.borderLight),
+                ),
+                onPressed: () => _handleTestConnection(context, ref, account),
+                icon: const Icon(PhosphorIconsRegular.plugsConnected,
+                    size: 18, color: AppColors.primary),
+                label: const Text('Uji koneksi',
+                    style:
+                        TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+              ),
             ),
           ],
         ),

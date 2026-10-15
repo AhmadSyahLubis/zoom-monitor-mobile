@@ -57,7 +57,7 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           GlassIconButton(
             icon: PhosphorIconsRegular.magnifyingGlass,
-            tooltip: 'Cari Ruang Kosong',
+            tooltip: 'Cari akun tersedia',
             onPressed: () => context.push(AppRoutes.search),
           ),
           PopupMenuButton<String>(

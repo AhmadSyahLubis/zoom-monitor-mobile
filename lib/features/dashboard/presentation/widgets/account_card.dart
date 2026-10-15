@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_type.dart';
 import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/utils/date_time_util.dart';
+import '../../../../core/widgets/app_nav_symbol.dart';
 import '../../data/models/dashboard_account.dart';
 import 'status_badge.dart';
 
@@ -36,21 +38,27 @@ class AccountCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: 4,
+                      width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: _statusColor,
-                        borderRadius: BorderRadius.circular(4),
+                        color: AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: AppNavSymbol(
+                          kind: AppNavSymbolKind.accounts,
+                          color: AppColors.primaryDark,
+                          size: 21,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -62,11 +70,7 @@ class AccountCard extends StatelessWidget {
                             account.accountName,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.textMain,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: AppType.cardTitle,
                           ),
                           if (account.email?.isNotEmpty == true) ...[
                             const SizedBox(height: 3),
@@ -83,41 +87,72 @@ class AccountCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                    if (onTap != null) ...[
+                      const SizedBox(width: 6),
+                      const Icon(PhosphorIconsRegular.arrowRight,
+                          size: 18, color: AppColors.textMuted),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: StatusBadge(status: account.status),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 7,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    StatusBadge(status: account.status),
+                    if (account.planType.isNotEmpty)
+                      Text(
+                        account.planType,
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    if (account.meetingCapacity > 0)
+                      Text(
+                        '${account.meetingCapacity} peserta',
+                        style: const TextStyle(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                        ),
+                      ),
+                  ],
                 ),
                 if (account.currentTopic?.isNotEmpty == true) ...[
                   const SizedBox(height: 14),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                     decoration: BoxDecoration(
-                      color: AppColors.statusMeetingBg,
+                      color: const Color(0xFFF6F8FC),
                       borderRadius: BorderRadius.circular(10),
+                      border: Border(
+                        left: BorderSide(color: _statusColor, width: 3),
+                      ),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(
-                          PhosphorIconsRegular.microphone,
-                          size: 16,
-                          color: AppColors.statusMeeting,
+                        const Text(
+                          'TOPIK RAPAT',
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.7,
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            account.currentTopic!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.statusMeeting,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        const SizedBox(height: 4),
+                        Text(
+                          account.currentTopic!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AppColors.textMain,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -126,23 +161,37 @@ class AccountCard extends StatelessWidget {
                 ],
                 const SizedBox(height: 14),
                 const Divider(height: 1),
-                const SizedBox(height: 12),
-                Text(
-                  '${account.planType}  ·  ${account.meetingCapacity} peserta',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textMain,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 11),
+                Row(
+                  children: [
+                    const Icon(PhosphorIconsRegular.clock,
+                        size: 14, color: AppColors.textMuted),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Diperbarui ${DateTimeUtil.formatTimeOnlyWib(account.lastUpdated.toIso8601String())}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: AppColors.textMuted, fontSize: 11),
+                      ),
+                    ),
+                  ],
+                ),
+                if (onTap != null) ...[
+                  const SizedBox(height: 7),
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'Lihat jadwal',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Diperbarui ${DateTimeUtil.formatTimeOnlyWib(account.lastUpdated.toIso8601String())}',
-                  style:
-                      const TextStyle(color: AppColors.textMuted, fontSize: 11),
-                ),
+                ],
               ],
             ),
           ),

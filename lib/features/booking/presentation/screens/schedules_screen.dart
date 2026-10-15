@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/utils/ui_feedback.dart';
 import '../../../../core/widgets/app_glass_nav_bar.dart';
+import '../../../../core/widgets/section_photo_banner.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/load_error_state.dart';
 import '../../data/models/schedule_item.dart';
@@ -211,8 +212,14 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
           await ref.read(schedulesProvider.future);
         },
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 40, 20, 110),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
           children: [
+            SectionPhotoBanner(
+              asset: 'assets/images/schedule_room.png',
+              title: 'Agenda rapat',
+              subtitle: emptyMessage,
+            ),
+            const SizedBox(height: 30),
             EmptyStateWidget(
               icon: PhosphorIconsRegular.calendarBlank,
               title: 'Tidak Ada Rapat',
@@ -232,24 +239,34 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
       },
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
-        itemCount: items.length,
+        itemCount: items.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (ctx, idx) => RepaintBoundary(
-          child: MeetingCard(
-            meeting: items[idx],
-            type: type,
-            onEndMeeting: type == MeetingCardType.live
-                ? () => _handleEndMeeting(items[idx])
-                : null,
-            onEditMeeting: (type == MeetingCardType.upcoming ||
-                    type == MeetingCardType.live)
-                ? () => _handleEditMeeting(items[idx])
-                : null,
-            onDeleteMeeting: type == MeetingCardType.upcoming
-                ? () => _handleDeleteMeeting(items[idx])
-                : null,
-          ),
-        ),
+        itemBuilder: (ctx, idx) => idx == 0
+            ? SectionPhotoBanner(
+                asset: 'assets/images/schedule_room.png',
+                title: type == MeetingCardType.live
+                    ? 'Sedang berlangsung'
+                    : type == MeetingCardType.upcoming
+                        ? 'Rapat berikutnya'
+                        : 'Riwayat rapat',
+                subtitle: '${items.length} rapat dalam daftar',
+              )
+            : RepaintBoundary(
+                child: MeetingCard(
+                  meeting: items[idx - 1],
+                  type: type,
+                  onEndMeeting: type == MeetingCardType.live
+                      ? () => _handleEndMeeting(items[idx - 1])
+                      : null,
+                  onEditMeeting: (type == MeetingCardType.upcoming ||
+                          type == MeetingCardType.live)
+                      ? () => _handleEditMeeting(items[idx - 1])
+                      : null,
+                  onDeleteMeeting: type == MeetingCardType.upcoming
+                      ? () => _handleDeleteMeeting(items[idx - 1])
+                      : null,
+                ),
+              ),
       ),
     );
   }

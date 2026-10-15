@@ -6,6 +6,9 @@ import 'package:zoom_monitor_mobile/features/dashboard/presentation/widgets/dash
 import 'package:zoom_monitor_mobile/features/dashboard/presentation/widgets/stats_overview_bar.dart';
 import 'package:zoom_monitor_mobile/features/booking/data/models/schedule_item.dart';
 import 'package:zoom_monitor_mobile/features/booking/presentation/widgets/meeting_card.dart';
+import 'package:zoom_monitor_mobile/core/widgets/section_photo_banner.dart';
+import 'package:zoom_monitor_mobile/features/recording/data/models/recording_item.dart';
+import 'package:zoom_monitor_mobile/features/recording/presentation/widgets/recording_card.dart';
 
 void main() {
   testWidgets('meeting search hero stays usable with enlarged text',
@@ -115,6 +118,12 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(2),
+          ),
+          child: child!,
+        ),
         home: Scaffold(
           body: ListView(
             padding: const EdgeInsets.all(16),
@@ -132,6 +141,83 @@ void main() {
     );
 
     expect(find.text('Gabung Zoom'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('section photo banner grows for enlarged text', (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(2),
+          ),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: const [
+              SectionPhotoBanner(
+                asset: 'assets/images/search_availability.png',
+                title: 'Cari slot kosong',
+                subtitle: 'Periksa akun yang siap untuk rapat Anda.',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Cari slot kosong'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('recording card fits a narrow screen with enlarged text',
+      (tester) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final recording = RecordingItem(
+      meetingId: 1,
+      uuid: 'test',
+      topic: 'Rapat koordinasi lintas divisi perusahaan',
+      startTime: '2026-10-14T07:00:00Z',
+      duration: 120,
+      totalSize: 104857600,
+      shareUrl: 'https://example.com/recording',
+      recordingCount: 1,
+      recordingFiles: [],
+      accountName: 'Akun rapat pusat',
+      accountId: 1,
+      hostName: 'Administrator Rapat Regional Jakarta',
+      hostEmail: '',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(2),
+          ),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [RecordingCard(recording: recording)],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Putar rekaman'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
