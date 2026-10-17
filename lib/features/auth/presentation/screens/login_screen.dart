@@ -7,6 +7,7 @@ import '../../../../core/config/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/utils/device_helper.dart';
+import '../../../../core/utils/image_decode_size.dart';
 import '../../../../core/utils/ui_feedback.dart';
 import '../controllers/auth_controller.dart';
 
@@ -190,6 +191,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             children: [
                               Image.asset(
                                 'assets/images/hybrid_desk_login.png',
+                                cacheWidth: imageCacheWidth(
+                                  context,
+                                  MediaQuery.sizeOf(context).width,
+                                ),
                                 fit: BoxFit.cover,
                                 alignment: Alignment.centerRight,
                                 excludeFromSemantics: true,
@@ -215,6 +220,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       borderRadius: BorderRadius.circular(9),
                                       child: Image.asset(
                                         'assets/icons/zoom_monitor_app_icon.png',
+                                        cacheWidth: imageCacheWidth(
+                                          context,
+                                          84,
+                                          maxWidth: 256,
+                                        ),
                                         width: 36,
                                         height: 36,
                                       ),

@@ -75,16 +75,18 @@ class _RecordingsScreenState extends ConsumerState<RecordingsScreen> {
   }
 
   void _onSearchChanged(String val) {
-    setState(() {});
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 350), () {
       if (!mounted) return;
+      final search = val.trim().isEmpty ? null : val.trim();
       ref.read(recordingFilterProvider.notifier).update(
-            (state) => RecordingFilter(
-              from: state.from,
-              to: state.to,
-              search: val.trim().isEmpty ? null : val.trim(),
-            ),
+            (state) => state.search == search
+                ? state
+                : RecordingFilter(
+                    from: state.from,
+                    to: state.to,
+                    search: search,
+                  ),
           );
     });
   }
@@ -112,21 +114,24 @@ class _RecordingsScreenState extends ConsumerState<RecordingsScreen> {
                 hintText: 'Cari topik rekaman atau host...',
                 prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass,
                     color: AppColors.textMuted),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(PhosphorIconsRegular.x, size: 18),
-                        onPressed: () {
-                          _debounceTimer?.cancel();
-                          _searchController.clear();
-                          ref.read(recordingFilterProvider.notifier).update(
-                                (state) => RecordingFilter(
-                                  from: state.from,
-                                  to: state.to,
-                                ),
-                              );
-                        },
-                      )
-                    : null,
+                suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _searchController,
+                  builder: (context, value, _) => value.text.isEmpty
+                      ? const SizedBox.shrink()
+                      : IconButton(
+                          icon: const Icon(PhosphorIconsRegular.x, size: 18),
+                          onPressed: () {
+                            _debounceTimer?.cancel();
+                            _searchController.clear();
+                            ref.read(recordingFilterProvider.notifier).update(
+                                  (state) => RecordingFilter(
+                                    from: state.from,
+                                    to: state.to,
+                                  ),
+                                );
+                          },
+                        ),
+                ),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               ),

@@ -21,9 +21,12 @@ class DashboardController
       state = const AsyncValue.loading();
     }
     try {
-      final accounts = await _repository.getDashboard(forceRefresh: forceRefresh);
+      final accounts =
+          await _repository.getDashboard(forceRefresh: forceRefresh);
+      if (!mounted) return;
       state = AsyncValue.data(accounts);
     } catch (e, st) {
+      if (!mounted) return;
       if (!state.hasValue) {
         state = AsyncValue.error(e, st);
       }

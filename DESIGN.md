@@ -4,7 +4,7 @@ Zoom Monitor is a mobile operations app for coordinating company Zoom Premium ac
 
 ## Character and hierarchy
 
-- Calm, precise, corporate. Data and actions lead; decoration supports them.
+- Calm, precise, corporate. The supplied PayPal, medical, and smart-home references inform the light canvas, compact data cards, navy photo feature, and selective clear-blue emphasis. Their content and brand marks are not copied.
 - Inter is the single UI typeface, bundled in `assets/fonts`. Its text shapes suit dense mobile controls; weight and spacing distinguish titles from data and actions. Keep Indonesian labels short and readable.
 - Portrait phone layouts should work from 360 px. Primary tap targets are at least 44 px; content clears the floating navigation and safe areas.
 - Visual dials: ENERGY 2, RHYTHM 2, MOTION 1. The focused action or operational state leads each screen; illustration stays secondary.
@@ -13,14 +13,15 @@ Zoom Monitor is a mobile operations app for coordinating company Zoom Premium ac
 
 | Role | Color | Use |
 |---|---|---|
-| Navy | `#182640` | App icon, dark hero, strong text |
-| Slate blue | `#2B4C86` | Primary actions and focus |
-| Soft blue | `#E8EEFA` | Selected navigation and quiet emphasis |
-| Canvas | `#EEF2F7` | Screen background |
+| Navy | `#10243F` | Dark hero, selected navigation, strong text |
+| Deep blue | `#173D72` | Primary actions and focus |
+| Clear blue | `#087EAE` | Availability and selected detail |
+| Soft blue | `#E8F4FA` | Quiet emphasis |
+| Canvas | `#F2F5F9` | Screen background |
 | White | `#FFFFFF` | Cards, forms, dialogs |
-| Ink | `#1A283B` | Main copy |
-| Muted | `#586779` | Supporting copy |
-| Border | `#DCE3EC` | Card and field structure |
+| Ink | `#14273E` | Main copy |
+| Muted | `#536579` | Supporting copy |
+| Border | `#D8E2EB` | Card and field structure |
 
 Semantic states retain separate text and background colors in `lib/core/theme/app_colors.dart`. Availability uses restrained teal, active meeting muted red, and scheduled muted amber. Always pair color with a written state.
 
@@ -32,7 +33,8 @@ The five bottom navigation symbols, status symbols, and selected action symbols 
 
 ## Surfaces and assets
 
-- The bottom navigation is the single persistent frosted layer. Its blur, white rim, and navy shadow should remain subtle. Content cards and forms are solid white.
+- The bottom navigation is the single persistent frosted layer. Its selected destination is a solid navy capsule with a white icon and label. Header action controls may use a light translucent surface. Content cards and forms are solid white.
+- The home page starts with a light greeting, then a navy photographic action panel. This separates orientation from action and gives the photo room without covering the operational data. Account totals use a real proportional status strip rather than a decorative chart.
 - Dashboard and login use meeting imagery; Search, Schedules, Recordings, and Accounts each use one compact editorial banner relevant to the page. The photo sits behind a navy legibility layer and never replaces operational data. Generation prompts are recorded in `assets/images/ASSET_SOURCES.md`.
 - Empty states use four original vector scenes: account credentials, time search, calendar, and recording playback. Their repeated aperture detail links them to the app identity without implying unavailable data.
 - Data cards remain opaque and scannable. Search leads with availability, schedules lead with date and topic, recordings group playback metadata, and accounts group connection status with account ID. Radius is 10–20 px by component role; the floating navigation uses 26 px. Shadows stay subtle.

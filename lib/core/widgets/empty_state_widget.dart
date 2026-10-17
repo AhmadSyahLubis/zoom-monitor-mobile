@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/glass_surface.dart';
+import '../utils/image_decode_size.dart';
 
 class EmptyStateWidget extends StatelessWidget {
   final String artwork;
@@ -26,6 +27,7 @@ class EmptyStateWidget extends StatelessWidget {
         children: [
           Image.asset(
             artwork,
+            cacheWidth: imageCacheWidth(context, 236, maxWidth: 560),
             width: 236,
             height: 144,
             fit: BoxFit.contain,

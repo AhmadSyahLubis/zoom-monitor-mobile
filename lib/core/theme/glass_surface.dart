@@ -13,7 +13,7 @@ class AppBackdrop extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFF6F8FB), AppColors.scaffoldLight],
+          colors: [Color(0xFFF8FAFC), AppColors.scaffoldLight],
         ),
       ),
       child: Center(
@@ -75,7 +75,7 @@ class GlassAppBarBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.scaffoldLight,
+        color: const Color(0xFFF8FAFC),
         border: Border(
           bottom: BorderSide(
             color: AppColors.borderLight.withValues(alpha: 0.8),
@@ -93,7 +93,7 @@ class ContentSurface extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(18),
-    this.radius = 20,
+    this.radius = 18,
     this.margin,
   });
 
@@ -111,12 +111,12 @@ class ContentSurface extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: const Color(0xFFE4EAF2)),
+        border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.8)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryDark.withValues(alpha: 0.045),
-            blurRadius: 18,
-            offset: const Offset(0, 5),
+            color: AppColors.primaryDark.withValues(alpha: 0.035),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -144,14 +144,14 @@ class GlassIconButton extends StatelessWidget {
       child: Tooltip(
         message: tooltip,
         child: Material(
-          color: Colors.white,
+          color: const Color(0xF2FFFFFF),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: AppColors.borderLight),
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.9)),
           ),
-          elevation: 0,
+          elevation: 1,
           child: InkWell(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             onTap: onPressed,
             child: SizedBox(
               width: 44,

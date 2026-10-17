@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/image_decode_size.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/app_routes.dart';
@@ -78,6 +79,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 borderRadius: BorderRadius.circular(22),
                 child: Image.asset(
                   'assets/icons/zoom_monitor_app_icon.png',
+                  cacheWidth: imageCacheWidth(context, 84, maxWidth: 256),
                   width: 84,
                   height: 84,
                   fit: BoxFit.cover,

@@ -152,17 +152,33 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
       appBar: AppBar(
         flexibleSpace: const GlassAppBarBackground(),
         title: const Text('Jadwal rapat'),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textMuted,
-          indicatorColor: AppColors.primary,
-          indicatorWeight: 3,
-          tabs: const [
-            Tab(text: 'Live Rapat'),
-            Tab(text: 'Mendatang'),
-            Tab(text: 'Riwayat'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(58),
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 9),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: AppColors.borderLight),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              labelColor: Colors.white,
+              unselectedLabelColor: AppColors.textMuted,
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              indicator: BoxDecoration(
+                color: AppColors.primaryDark,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              tabs: const [
+                Tab(height: 40, text: 'Live Rapat'),
+                Tab(height: 40, text: 'Mendatang'),
+                Tab(height: 40, text: 'Riwayat'),
+              ],
+            ),
+          ),
         ),
       ),
       body: schedulesAsync.when(

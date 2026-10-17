@@ -5,6 +5,11 @@ import '../../../../core/providers/core_providers.dart';
 import '../../../../core/storage/preferences_service.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../core/utils/device_helper.dart';
+import '../../../account/presentation/controllers/account_controller.dart';
+import '../../../booking/presentation/controllers/booking_controller.dart';
+import '../../../booking/presentation/controllers/schedules_controller.dart';
+import '../../../dashboard/presentation/controllers/dashboard_controller.dart';
+import '../../../recording/presentation/controllers/recording_controller.dart';
 import '../../data/auth_repository.dart';
 import '../../data/models/login_request.dart';
 import '../../data/models/user_profile.dart';
@@ -64,9 +69,11 @@ class AuthController extends StateNotifier<AuthState> {
   final AuthRepository _repo;
   final SecureStorageService _secureStorage;
   final PreferencesService _prefs;
+  final Ref _ref;
   final LocalAuthentication _localAuth = LocalAuthentication();
 
-  AuthController(this._repo, this._secureStorage, this._prefs) : super(AuthState()) {
+  AuthController(this._repo, this._secureStorage, this._prefs, this._ref)
+      : super(AuthState()) {
     checkInitialAuth();
   }
 
@@ -75,7 +82,8 @@ class AuthController extends StateNotifier<AuthState> {
     try {
       final token = await _secureStorage.getAccessToken();
       if (token == null || token.isEmpty) {
-        state = state.copyWith(isLoading: false, isInitialized: true, clearUser: true);
+        state = state.copyWith(
+            isLoading: false, isInitialized: true, clearUser: true);
         return;
       }
 
@@ -185,7 +193,8 @@ class AuthController extends StateNotifier<AuthState> {
       final isDeviceSupported = await _localAuth.isDeviceSupported();
 
       if (!canCheck && !isDeviceSupported) {
-        state = state.copyWith(errorMessage: 'Perangkat tidak mendukung sensor sidik jari');
+        state = state.copyWith(
+            errorMessage: 'Perangkat tidak mendukung sensor sidik jari');
         return false;
       }
 
@@ -202,12 +211,14 @@ class AuthController extends StateNotifier<AuthState> {
       state = state.copyWith(isLoading: true, clearError: true);
       final username = _prefs.savedUsername ?? 'admin';
       final deviceId = await DeviceHelper.getDeviceId();
-      final bioToken = await _secureStorage.storage.read(key: 'biometric_token');
+      final bioToken =
+          await _secureStorage.storage.read(key: 'biometric_token');
 
       if (bioToken == null || bioToken.isEmpty) {
         state = state.copyWith(
           isLoading: false,
-          errorMessage: 'Sensor sidik jari belum didaftarkan di server. Silakan masuk via PIN terlebih dahulu.',
+          errorMessage:
+              'Sensor sidik jari belum didaftarkan di server. Silakan masuk via PIN terlebih dahulu.',
         );
         return false;
       }
@@ -283,7 +294,8 @@ class AuthController extends StateNotifier<AuthState> {
         final isSupported = await _localAuth.isDeviceSupported();
         if (canCheck || isSupported) {
           final didAuth = await _localAuth.authenticate(
-            localizedReason: 'Pindai sensor sidik jari Anda untuk konfirmasi aktivasi',
+            localizedReason:
+                'Pindai sensor sidik jari Anda untuk konfirmasi aktivasi',
             options: const AuthenticationOptions(
               biometricOnly: false,
               stickyAuth: true,
@@ -294,12 +306,14 @@ class AuthController extends StateNotifier<AuthState> {
 
         await _repo.enableBiometric(deviceId);
         if (state.user != null) {
-          state = state.copyWith(user: state.user!.copyWith(biometricEnabled: true));
+          state = state.copyWith(
+              user: state.user!.copyWith(biometricEnabled: true));
         }
       } else {
         await _repo.disableBiometric(deviceId);
         if (state.user != null) {
-          state = state.copyWith(user: state.user!.copyWith(biometricEnabled: false));
+          state = state.copyWith(
+              user: state.user!.copyWith(biometricEnabled: false));
         }
       }
       return true;
@@ -313,6 +327,14 @@ class AuthController extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true);
     ApiCacheManager().clear();
     await _repo.logout();
+    _ref.invalidate(dashboardAccountsProvider);
+    _ref.invalidate(accountsListProvider);
+    _ref.invalidate(schedulesProvider);
+    _ref.invalidate(recordingsListProvider);
+    _ref.invalidate(recordingFilterProvider);
+    _ref.invalidate(accountControllerProvider);
+    _ref.invalidate(bookingControllerProvider);
+    _ref.invalidate(schedulesControllerProvider);
     state = AuthState(isInitialized: true);
   }
 
@@ -321,9 +343,10 @@ class AuthController extends StateNotifier<AuthState> {
   }
 }
 
-final authStateProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
+final authStateProvider =
+    StateNotifierProvider<AuthController, AuthState>((ref) {
   final repo = ref.watch(authRepositoryProvider);
   final secureStorage = ref.watch(secureStorageServiceProvider);
   final prefs = ref.watch(preferencesServiceProvider);
-  return AuthController(repo, secureStorage, prefs);
+  return AuthController(repo, secureStorage, prefs, ref);
 });

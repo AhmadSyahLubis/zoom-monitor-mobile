@@ -82,27 +82,27 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFFF9FBFD),
+        fillColor: Colors.white,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.statusMeeting),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide:
               const BorderSide(color: AppColors.statusMeeting, width: 2),
         ),
@@ -116,11 +116,27 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
             fontFamily: 'Inter',
             fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(0, 44),
+          padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 14,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -131,7 +147,7 @@ class AppTheme {
           side: const BorderSide(color: AppColors.borderLight),
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
             fontFamily: 'Inter',
@@ -150,10 +166,10 @@ class AppTheme {
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: const Color(0xFFF9FBFD),
+        backgroundColor: Colors.white,
         selectedColor: AppColors.primaryLight,
         side: const BorderSide(color: AppColors.borderLight),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         labelStyle: const TextStyle(
           fontFamily: 'Inter',
           fontSize: 12,

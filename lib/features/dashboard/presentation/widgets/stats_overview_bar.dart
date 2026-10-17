@@ -19,23 +19,55 @@ class StatsOverviewBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ContentSurface(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+      padding: const EdgeInsets.fromLTRB(18, 17, 18, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'RINGKASAN AKUN',
-            style: TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Akun terhubung',
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Text('$totalAccounts', style: AppType.metric),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            '$totalAccounts akun',
-            style: AppType.metric,
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: SizedBox(
+              height: 5,
+              child: Row(
+                children: [
+                  if (availableAccounts > 0)
+                    Expanded(
+                      flex: availableAccounts,
+                      child: const ColoredBox(color: AppColors.statusAvailable),
+                    ),
+                  if (busyAccounts > 0)
+                    Expanded(
+                      flex: busyAccounts,
+                      child: const ColoredBox(color: AppColors.statusMeeting),
+                    ),
+                  if (totalAccounts - availableAccounts - busyAccounts > 0)
+                    Expanded(
+                      flex: totalAccounts - availableAccounts - busyAccounts,
+                      child: const ColoredBox(color: AppColors.borderLight),
+                    ),
+                  if (totalAccounts == 0)
+                    const Expanded(
+                      child: ColoredBox(color: AppColors.borderLight),
+                    ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 14),
           Row(
@@ -46,7 +78,6 @@ class StatsOverviewBar extends StatelessWidget {
                   label: 'Siap dipakai',
                   kind: AppNavSymbolKind.available,
                   color: AppColors.statusAvailable,
-                  background: AppColors.statusAvailableBg,
                 ),
               ),
               const SizedBox(width: 9),
@@ -56,7 +87,6 @@ class StatsOverviewBar extends StatelessWidget {
                   label: 'Sedang rapat',
                   kind: AppNavSymbolKind.busy,
                   color: AppColors.statusMeeting,
-                  background: AppColors.statusMeetingBg,
                 ),
               ),
             ],
@@ -73,27 +103,25 @@ class _Metric extends StatelessWidget {
     required this.label,
     required this.kind,
     required this.color,
-    required this.background,
   });
 
   final int value;
   final String label;
   final AppNavSymbolKind kind;
   final Color color;
-  final Color background;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 58),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      constraints: const BoxConstraints(minHeight: 54),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(11),
+        color: AppColors.scaffoldLight,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          AppNavSymbol(kind: kind, color: color, size: 17),
+          AppNavSymbol(kind: kind, color: color, size: 18),
           const SizedBox(width: 7),
           Expanded(
             child: Text(

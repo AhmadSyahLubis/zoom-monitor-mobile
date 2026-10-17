@@ -7,6 +7,7 @@ import '../../../../core/config/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/utils/ui_feedback.dart';
+import '../../../../core/utils/image_decode_size.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../../../core/widgets/app_glass_nav_bar.dart';
 import '../../../../core/widgets/app_nav_symbol.dart';
@@ -40,6 +41,7 @@ class DashboardScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(10),
               child: Image.asset(
                 'assets/icons/zoom_monitor_app_icon.png',
+                cacheWidth: imageCacheWidth(context, 84, maxWidth: 256),
                 width: 36,
                 height: 36,
                 fit: BoxFit.cover,

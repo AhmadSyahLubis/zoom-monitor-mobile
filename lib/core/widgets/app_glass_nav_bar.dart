@@ -37,26 +37,26 @@ class AppGlassNavBar extends StatelessWidget {
         top: false,
         minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
         child: Container(
-          height: 66,
+          height: 68,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryDark.withValues(alpha: 0.12),
-                blurRadius: 20,
-                offset: const Offset(0, 7),
+                color: AppColors.primaryDark.withValues(alpha: 0.11),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(24),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFD).withValues(alpha: 0.86),
-                  borderRadius: BorderRadius.circular(26),
+                  color: Colors.white.withValues(alpha: 0.88),
+                  borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.9),
                     width: 1,
@@ -103,7 +103,7 @@ class _NavDestination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primaryDark : AppColors.textMuted;
+    final color = selected ? Colors.white : AppColors.textMuted;
     return Semantics(
       button: true,
       selected: selected,
@@ -117,7 +117,7 @@ class _NavDestination extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
             decoration: BoxDecoration(
-              color: selected ? AppColors.primaryLight : Colors.transparent,
+              color: selected ? AppColors.primaryDark : Colors.transparent,
               borderRadius: BorderRadius.circular(21),
             ),
             child: Column(

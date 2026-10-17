@@ -1,14 +1,11 @@
-import 'dart:async';
-
-/// Production-ready In-Memory Cache & Request Deduplication (Singleflight) Manager.
-/// Implements Stale-While-Revalidate (SWR) pattern for enterprise mobile apps.
 class ApiCacheManager {
   static final ApiCacheManager _instance = ApiCacheManager._internal();
   factory ApiCacheManager() => _instance;
   ApiCacheManager._internal();
 
   final Map<String, _CacheEntry> _cache = {};
-  final Map<String, Future<dynamic>> _inFlight = {};
+  final Map<String, _InFlight> _inFlight = {};
+  static const int _maxEntries = 128;
 
   /// Retrieve cached data if valid within [ttl]
   T? get<T>(String key, {Duration ttl = const Duration(seconds: 30)}) {
@@ -23,12 +20,17 @@ class ApiCacheManager {
 
   /// Store data in cache
   void set<T>(String key, T data) {
+    _cache.remove(key);
     _cache[key] = _CacheEntry(data, DateTime.now());
+    if (_cache.length > _maxEntries) {
+      _cache.remove(_cache.keys.first);
+    }
   }
 
   /// Invalidate cache keys matching [prefix]
   void invalidate(String prefix) {
     _cache.removeWhere((key, _) => key.startsWith(prefix));
+    _inFlight.removeWhere((key, _) => key.startsWith(prefix));
   }
 
   /// Clear all cache
@@ -44,7 +46,6 @@ class ApiCacheManager {
     Duration ttl = const Duration(seconds: 30),
     bool forceRefresh = false,
   }) async {
-    // 1. Return cached data if valid
     if (!forceRefresh) {
       final cached = get<T>(key, ttl: ttl);
       if (cached != null) {
@@ -52,27 +53,41 @@ class ApiCacheManager {
       }
     }
 
-    // 2. Singleflight: If identical request is currently in-flight, await existing Future
-    if (_inFlight.containsKey(key)) {
-      return (await _inFlight[key]) as T;
+    final inFlight = _inFlight[key];
+    if (inFlight != null) {
+      return (await inFlight.future) as T;
     }
 
-    // 3. Dispatch fresh network request
-    final completer = Completer<T>();
-    _inFlight[key] = completer.future;
+    final token = Object();
+    final request = _fetch(key, fetcher, token);
+    _inFlight[key] = _InFlight(token, request);
+    return request;
+  }
 
+  Future<T> _fetch<T>(
+    String key,
+    Future<T> Function() fetcher,
+    Object token,
+  ) async {
     try {
-      final result = await fetcher();
-      set<T>(key, result);
-      completer.complete(result);
+      final result = await Future<T>.sync(fetcher);
+      if (identical(_inFlight[key]?.token, token)) {
+        set<T>(key, result);
+      }
       return result;
-    } catch (e, st) {
-      completer.completeError(e, st);
-      rethrow;
     } finally {
-      _inFlight.remove(key);
+      if (identical(_inFlight[key]?.token, token)) {
+        _inFlight.remove(key);
+      }
     }
   }
+}
+
+class _InFlight {
+  final Object token;
+  final Future<dynamic> future;
+
+  _InFlight(this.token, this.future);
 }
 
 class _CacheEntry {

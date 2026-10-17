@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
 import '../theme/app_type.dart';
+import '../utils/image_decode_size.dart';
 
 class SectionPhotoBanner extends StatelessWidget {
   const SectionPhotoBanner({
@@ -17,27 +19,35 @@ class SectionPhotoBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(21),
       child: DecoratedBox(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(asset),
+            image: ResizeImage(
+              AssetImage(asset),
+              width: imageCacheWidth(context, MediaQuery.sizeOf(context).width),
+            ),
             fit: BoxFit.cover,
             alignment: Alignment.centerRight,
           ),
         ),
         child: DecoratedBox(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: [Color(0xF2182640), Color(0xB3182640), Color(0x1A182640)],
+              colors: [
+                AppColors.primaryDark.withValues(alpha: 0.95),
+                AppColors.primaryDark.withValues(alpha: 0.77),
+                AppColors.primaryDark.withValues(alpha: 0.06),
+              ],
+              stops: const [0, 0.52, 1],
             ),
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 124),
+            constraints: const BoxConstraints(minHeight: 144),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 20, 128, 20),
+              padding: const EdgeInsets.fromLTRB(20, 22, 100, 22),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,7 +56,7 @@ class SectionPhotoBanner extends StatelessWidget {
                     title,
                     style: AppType.section.copyWith(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 19,
                     ),
                   ),
                   const SizedBox(height: 7),

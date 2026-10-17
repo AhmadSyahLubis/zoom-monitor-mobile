@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zoom_monitor_mobile/core/network/api_cache_manager.dart';
 import 'package:zoom_monitor_mobile/core/utils/date_time_util.dart';
@@ -119,7 +121,9 @@ void main() {
       expect(item.formattedTotalSize, '50.0 MB');
     });
 
-    test('CheckConnectionResponse json parsing with success:true and active_users_count', () {
+    test(
+        'CheckConnectionResponse json parsing with success:true and active_users_count',
+        () {
       final json = {
         'success': true,
         'message': 'Koneksi berhasil! Terdeteksi 1 user aktif',
@@ -185,7 +189,9 @@ void main() {
       cache.clear();
     });
 
-    test('getOrFetch caches data and avoids second fetcher execution within TTL', () async {
+    test(
+        'getOrFetch caches data and avoids second fetcher execution within TTL',
+        () async {
       int callCount = 0;
       Future<String> fetchData() async {
         callCount++;
@@ -272,6 +278,68 @@ void main() {
 
       expect(cache.get('key1'), isNull);
       expect(cache.get('key2'), isNull);
+    });
+
+    test('invalidating an in-flight request cannot restore stale data',
+        () async {
+      final oldRequest = Completer<String>();
+      final oldResult = cache.getOrFetch<String>(
+        key: 'bookings:schedules',
+        fetcher: () => oldRequest.future,
+      );
+
+      cache.invalidate('bookings');
+      final freshResult = await cache.getOrFetch<String>(
+        key: 'bookings:schedules',
+        fetcher: () async => 'fresh',
+      );
+      oldRequest.complete('stale');
+
+      expect(freshResult, 'fresh');
+      expect(await oldResult, 'stale');
+      expect(cache.get<String>('bookings:schedules'), 'fresh');
+    });
+
+    test('clear prevents an old session request from refilling cache',
+        () async {
+      final pending = Completer<String>();
+      final oldResult = cache.getOrFetch<String>(
+        key: 'accounts:list',
+        fetcher: () => pending.future,
+      );
+
+      cache.clear();
+      pending.complete('old session');
+      expect(await oldResult, 'old session');
+      expect(cache.get<String>('accounts:list'), isNull);
+    });
+
+    test('a failed request can be retried without an unhandled error',
+        () async {
+      await expectLater(
+        cache.getOrFetch<String>(
+          key: 'recordings:list',
+          fetcher: () async => throw StateError('offline'),
+        ),
+        throwsStateError,
+      );
+
+      expect(
+        await cache.getOrFetch<String>(
+          key: 'recordings:list',
+          fetcher: () async => 'recovered',
+        ),
+        'recovered',
+      );
+    });
+
+    test('cache keeps a bounded number of search results', () {
+      for (var index = 0; index < 129; index++) {
+        cache.set('availability:$index', index);
+      }
+
+      expect(cache.get<int>('availability:0'), isNull);
+      expect(cache.get<int>('availability:128'), 128);
     });
   });
 }
