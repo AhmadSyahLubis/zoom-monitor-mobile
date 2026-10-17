@@ -3,14 +3,14 @@ import '../theme/app_colors.dart';
 import '../theme/glass_surface.dart';
 
 class EmptyStateWidget extends StatelessWidget {
-  final IconData icon;
+  final String artwork;
   final String title;
   final String message;
   final Widget? action;
 
   const EmptyStateWidget({
     super.key,
-    required this.icon,
+    required this.artwork,
     required this.title,
     required this.message,
     this.action,
@@ -24,14 +24,12 @@ class EmptyStateWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: BoxDecoration(
-              color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(17),
-            ),
-            child: Icon(icon, color: AppColors.primary, size: 28),
+          Image.asset(
+            artwork,
+            width: 236,
+            height: 144,
+            fit: BoxFit.contain,
+            excludeFromSemantics: true,
           ),
           const SizedBox(height: 18),
           Text(

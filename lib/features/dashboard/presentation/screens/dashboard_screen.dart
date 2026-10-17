@@ -9,6 +9,7 @@ import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/utils/ui_feedback.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../../../core/widgets/app_glass_nav_bar.dart';
+import '../../../../core/widgets/app_nav_symbol.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import 'package:local_auth/local_auth.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -219,7 +220,7 @@ class DashboardScreen extends ConsumerWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     return EmptyStateWidget(
-      icon: PhosphorIconsRegular.usersThree,
+      artwork: 'assets/icons/state_accounts.png',
       title: 'Belum Ada Akun Zoom Terhubung',
       message:
           'Tambahkan akun Zoom Server-to-Server (S2S) untuk memulai monitoring otomatis.',
@@ -311,8 +312,11 @@ class DashboardScreen extends ConsumerWidget {
                             color: AppColors.primaryLight,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(PhosphorIconsFill.shieldCheck,
-                              color: AppColors.primary, size: 24),
+                          child: const AppNavSymbol(
+                            kind: AppNavSymbolKind.secure,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(

@@ -90,7 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Pilih atau masukkan alamat IP backend komputer:',
+              'Pilih atau masukkan alamat backend server:',
               style: TextStyle(fontSize: 13, color: AppColors.textMuted),
             ),
             const SizedBox(height: 12),
@@ -98,7 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               controller: controller,
               decoration: const InputDecoration(
                 labelText: 'Base URL Backend',
-                hintText: 'http://10.70.0.153:8080/api/v1',
+                hintText: AppConfig.defaultBaseUrl,
               ),
             ),
             const SizedBox(height: 12),
@@ -107,17 +107,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               runSpacing: 6,
               children: [
                 ActionChip(
-                  label: const Text('Wi-Fi 10.70.0.153',
+                  label: const Text('localhost:8080',
                       style: TextStyle(fontSize: 11)),
                   onPressed: () {
-                    controller.text = 'http://10.70.0.153:8080/api/v1';
+                    controller.text = AppConfig.defaultBaseUrl;
                   },
                 ),
                 ActionChip(
-                  label: const Text('adb reverse 127.0.0.1',
+                  label: const Text('127.0.0.1:8080',
                       style: TextStyle(fontSize: 11)),
                   onPressed: () {
                     controller.text = 'http://127.0.0.1:8080/api/v1';
+                  },
+                ),
+                ActionChip(
+                  label: const Text('Emulator 10.0.2.2',
+                      style: TextStyle(fontSize: 11)),
+                  onPressed: () {
+                    controller.text = 'http://10.0.2.2:8080/api/v1';
                   },
                 ),
               ],

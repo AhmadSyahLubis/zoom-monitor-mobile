@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_type.dart';
 import '../../../../core/theme/glass_surface.dart';
+import '../../../../core/widgets/app_nav_symbol.dart';
 
 class StatsOverviewBar extends StatelessWidget {
   final int totalAccounts;
@@ -43,6 +44,7 @@ class StatsOverviewBar extends StatelessWidget {
                 child: _Metric(
                   value: availableAccounts,
                   label: 'Siap dipakai',
+                  kind: AppNavSymbolKind.available,
                   color: AppColors.statusAvailable,
                   background: AppColors.statusAvailableBg,
                 ),
@@ -52,6 +54,7 @@ class StatsOverviewBar extends StatelessWidget {
                 child: _Metric(
                   value: busyAccounts,
                   label: 'Sedang rapat',
+                  kind: AppNavSymbolKind.busy,
                   color: AppColors.statusMeeting,
                   background: AppColors.statusMeetingBg,
                 ),
@@ -68,12 +71,14 @@ class _Metric extends StatelessWidget {
   const _Metric({
     required this.value,
     required this.label,
+    required this.kind,
     required this.color,
     required this.background,
   });
 
   final int value;
   final String label;
+  final AppNavSymbolKind kind;
   final Color color;
   final Color background;
 
@@ -88,11 +93,7 @@ class _Metric extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
+          AppNavSymbol(kind: kind, color: color, size: 17),
           const SizedBox(width: 7),
           Expanded(
             child: Text(

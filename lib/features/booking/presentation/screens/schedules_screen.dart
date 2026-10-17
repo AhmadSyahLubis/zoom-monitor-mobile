@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 import '../../../../core/network/api_cache_manager.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/glass_surface.dart';
@@ -221,7 +220,7 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
             ),
             const SizedBox(height: 30),
             EmptyStateWidget(
-              icon: PhosphorIconsRegular.calendarBlank,
+              artwork: 'assets/icons/state_calendar.png',
               title: 'Tidak Ada Rapat',
               message: emptyMessage,
             ),

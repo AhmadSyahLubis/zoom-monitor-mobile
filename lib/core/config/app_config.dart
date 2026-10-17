@@ -4,13 +4,14 @@ class AppConfig {
     defaultValue: '',
   );
 
-  /// IP Wi-Fi Laptop di jaringan saat ini
-  static const String defaultHostIp = '10.70.0.153';
+  /// Base URL bawaan menggunakan localhost port 8080
+  /// Bekerja langsung via adb reverse tcp:8080 tcp:8080 di device fisik,
+  /// serta di browser web, desktop, dan simulator.
+  static const String defaultBaseUrl = 'http://localhost:8080/api/v1';
 
   static String customUrl = '';
 
   /// Base URL API Zoom Monitor
-  /// Mendukung langsung IP Wi-Fi laptop (192.168.1.101:8080) dan adb reverse (127.0.0.1:8080)
   static String get baseUrl {
     if (customUrl.isNotEmpty) {
       return customUrl;
@@ -18,7 +19,7 @@ class AppConfig {
     if (_defaultEnvUrl.isNotEmpty) {
       return _defaultEnvUrl;
     }
-    return 'http://$defaultHostIp:8080/api/v1';
+    return defaultBaseUrl;
   }
 
   static const Duration connectTimeout = Duration(seconds: 15);

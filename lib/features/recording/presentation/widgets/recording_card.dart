@@ -163,7 +163,11 @@ class RecordingCard extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(0, 44),
                     ),
-                    icon: const Icon(PhosphorIconsRegular.play, size: 17),
+                    icon: const AppNavSymbol(
+                      kind: AppNavSymbolKind.play,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                     label: const Text('Putar rekaman'),
                   ),
                 ),

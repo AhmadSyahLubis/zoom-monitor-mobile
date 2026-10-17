@@ -10,6 +10,7 @@ import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/utils/ui_feedback.dart';
 import '../../../../core/widgets/app_glass_nav_bar.dart';
 import '../../../../core/widgets/app_nav_symbol.dart';
+import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/load_error_state.dart';
 import '../../../../core/widgets/section_photo_banner.dart';
 import '../../data/models/zoom_account.dart';
@@ -100,22 +101,11 @@ class AccountsScreen extends ConsumerWidget {
                 }
 
                 if (accounts.isEmpty) {
-                  return const ContentSurface(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Belum ada akun terhubung',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w700)),
-                        SizedBox(height: 7),
-                        Text(
-                            'Tambahkan akun Zoom Premium perusahaan untuk mulai mengelola jadwal, akses, dan rekaman dari satu tempat.',
-                            style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textMuted,
-                                height: 1.5)),
-                      ],
-                    ),
+                  return const EmptyStateWidget(
+                    artwork: 'assets/icons/state_accounts.png',
+                    title: 'Belum ada akun terhubung',
+                    message:
+                        'Tambahkan akun Zoom Premium perusahaan untuk mengelola jadwal, akses, dan rekaman dari satu tempat.',
                   );
                 }
 
@@ -274,8 +264,11 @@ class AccountsScreen extends ConsumerWidget {
                   side: const BorderSide(color: AppColors.borderLight),
                 ),
                 onPressed: () => _handleTestConnection(context, ref, account),
-                icon: const Icon(PhosphorIconsRegular.plugsConnected,
-                    size: 18, color: AppColors.primary),
+                icon: const AppNavSymbol(
+                  kind: AppNavSymbolKind.link,
+                  color: AppColors.primary,
+                  size: 18,
+                ),
                 label: const Text('Uji koneksi',
                     style:
                         TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),

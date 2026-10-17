@@ -187,7 +187,7 @@ class _RecordingsScreenState extends ConsumerState<RecordingsScreen> {
                         ),
                         SizedBox(height: 30),
                         EmptyStateWidget(
-                          icon: PhosphorIconsRegular.cloudArrowDown,
+                          artwork: 'assets/icons/state_recordings.png',
                           title: 'Tidak Ada Rekaman Cloud',
                           message:
                               'Rekaman Zoom yang tersimpan di cloud akan otomatis muncul di sini.',

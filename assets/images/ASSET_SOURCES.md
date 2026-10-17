@@ -2,6 +2,10 @@
 
 The six PNG photographs below were generated for this project with OpenAI imagegen in `photorealistic-natural` mode on 15 October 2026. They contain no licensed third-party photography. The app icon and navigation icons are original vector/code assets in this repository.
 
+## UI symbol family
+
+`tool/design_assets/generate_ui_assets.py` produces ten original 24 px SVG symbols and four empty-state SVG scenes in `tool/design_assets/ui/`. PNG exports in `assets/icons/` were rendered with the installed `logo-design` skill's `render_png.py`. The skill's reference library informed the geometric construction; no third-party logo is copied. The symbols repeat the circular aperture and diagonal detail of this project's app mark. All artwork is decorative beside visible text labels.
+
 ## `meeting_console_hero.png`
 
 Prompt: “Use case: photorealistic-natural. Asset type: wide mobile dashboard hero background for an internal corporate meeting-account management app. Scene: elegant contemporary conference room just before a hybrid meeting, one wall display showing a subtle non-readable calendar grid and tiny video-call tiles, table with closed notebooks and a single laptop, no visible brand logos, no people. Composition: 3:2 wide image, subject emphasis on the RIGHT HALF, generous dark negative space on the LEFT for white app text and button overlay, usable when cropped to a mobile card. Style: natural architectural editorial photography, understated, credible corporate office, real materials and depth, not 3D render. Lighting: soft cool morning window light with controlled navy shadows. Palette: deep ink navy, cool slate blue, warm neutral gray, restrained pale cobalt highlight. Constraints: no text, no watermark, no logos, no green tint, no glowing glass panels, no floating UI, no device mockup.”

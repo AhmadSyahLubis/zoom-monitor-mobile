@@ -7,6 +7,8 @@ import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/theme/app_type.dart';
 import '../../../../core/utils/date_time_util.dart';
 import '../../../../core/widgets/app_glass_nav_bar.dart';
+import '../../../../core/widgets/app_nav_symbol.dart';
+import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/section_photo_banner.dart';
 import '../../data/models/availability_result.dart';
 import '../controllers/booking_controller.dart';
@@ -356,8 +358,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         _hasSearched = true;
                       });
                     },
-                    icon: const Icon(PhosphorIconsRegular.magnifyingGlass,
-                        size: 20),
+                    icon: const AppNavSymbol(
+                      kind: AppNavSymbolKind.search,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     label: const Text('Cek ketersediaan',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
@@ -369,40 +374,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
             // Hasil Pencarian
             if (!_hasSearched)
-              Container(
-                padding: const EdgeInsets.all(28),
-                alignment: Alignment.center,
-                child: const Column(
-                  children: [
-                    Icon(PhosphorIconsRegular.calendarCheck,
-                        size: 48, color: AppColors.textMuted),
-                    SizedBox(height: 12),
-                    Text(
-                      'Pilih waktu rapat dan tekan Cek ketersediaan untuk melihat akun yang siap dipakai.',
-                      textAlign: TextAlign.center,
-                      style:
-                          TextStyle(color: AppColors.textMuted, fontSize: 13),
-                    ),
-                  ],
-                ),
+              const EmptyStateWidget(
+                artwork: 'assets/icons/state_search.png',
+                title: 'Siap cari waktu rapat',
+                message:
+                    'Pilih waktu rapat dan tekan Cek ketersediaan untuk melihat akun yang siap dipakai.',
               )
             else if (searchAsync != null)
               searchAsync.when(
                 data: (results) {
                   if (results.isEmpty) {
-                    return Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.borderLight),
-                      ),
-                      child: const Center(
-                        child: Text(
+                    return const EmptyStateWidget(
+                      artwork: 'assets/icons/state_accounts.png',
+                      title: 'Belum ada akun tersedia',
+                      message:
                           'Tidak ada akun Zoom yang ditemukan pada sistem.',
-                          style: TextStyle(color: AppColors.textMuted),
-                        ),
-                      ),
                     );
                   }
 
