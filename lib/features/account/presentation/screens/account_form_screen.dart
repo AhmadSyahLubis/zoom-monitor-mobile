@@ -34,9 +34,8 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     final acc = widget.initialAccount;
     _nameController = TextEditingController(text: acc?.accountName ?? '');
     _emailController = TextEditingController(text: acc?.email ?? '');
-    _accountIdController =
-        TextEditingController(text: acc?.zoomAccountId ?? '');
-    _clientIdController = TextEditingController(text: acc?.clientId ?? '');
+    _accountIdController = TextEditingController();
+    _clientIdController = TextEditingController();
     _clientSecretController = TextEditingController(text: '');
     _hostKeyController = TextEditingController(text: acc?.hostKey ?? '');
   }
@@ -57,14 +56,10 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
     final data = <String, dynamic>{
       'account_name': _nameController.text.trim(),
-      'email': _emailController.text.trim().isEmpty
-          ? null
-          : _emailController.text.trim(),
+      'email': _emailController.text.trim(),
       'zoom_account_id': _accountIdController.text.trim(),
       'client_id': _clientIdController.text.trim(),
-      'host_key': _hostKeyController.text.trim().isEmpty
-          ? null
-          : _hostKeyController.text.trim(),
+      'host_key': _hostKeyController.text.trim(),
     };
 
     if (_clientSecretController.text.isNotEmpty) {
@@ -176,32 +171,40 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 15)),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Diperoleh dari Zoom App Marketplace (Server-to-Server OAuth App)',
-                      style:
-                          TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    Text(
+                      _isEdit
+                          ? 'Kredensial tersimpan tidak ditampilkan. Kosongkan kolom yang tidak diubah.'
+                          : 'Diperoleh dari Zoom App Marketplace (Server-to-Server OAuth App)',
+                      style: const TextStyle(
+                          fontSize: 12, color: AppColors.textMuted),
                     ),
                     const SizedBox(height: 14),
                     TextFormField(
                       controller: _accountIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'Zoom Account ID *',
+                      decoration: InputDecoration(
+                        labelText: _isEdit
+                            ? 'Zoom Account ID (kosongkan jika tetap)'
+                            : 'Zoom Account ID *',
                         hintText: 'Masukkan Account ID dari Marketplace',
                       ),
-                      validator: (v) => v == null || v.trim().isEmpty
-                          ? 'Zoom Account ID wajib diisi'
-                          : null,
+                      validator: (v) =>
+                          !_isEdit && (v == null || v.trim().isEmpty)
+                              ? 'Zoom Account ID wajib diisi'
+                              : null,
                     ),
                     const SizedBox(height: 14),
                     TextFormField(
                       controller: _clientIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'Client ID *',
+                      decoration: InputDecoration(
+                        labelText: _isEdit
+                            ? 'Client ID (kosongkan jika tetap)'
+                            : 'Client ID *',
                         hintText: 'Masukkan Client ID',
                       ),
-                      validator: (v) => v == null || v.trim().isEmpty
-                          ? 'Client ID wajib diisi'
-                          : null,
+                      validator: (v) =>
+                          !_isEdit && (v == null || v.trim().isEmpty)
+                              ? 'Client ID wajib diisi'
+                              : null,
                     ),
                     const SizedBox(height: 14),
                     TextFormField(

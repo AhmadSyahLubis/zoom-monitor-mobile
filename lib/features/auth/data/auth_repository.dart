@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_endpoints.dart';
-import '../../../../core/network/api_response.dart';
+import '../../../../core/security/device_biometrics.dart';
 import '../../../../core/storage/preferences_service.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import 'models/auth_response.dart';
@@ -11,9 +11,7 @@ class AuthException implements Exception {
   final String message;
   final String? errorCode;
   final int? statusCode;
-
   AuthException({required this.message, this.errorCode, this.statusCode});
-
   @override
   String toString() => message;
 }
@@ -22,227 +20,168 @@ class AuthRepository {
   final Dio _dio;
   final SecureStorageService _secureStorage;
   final PreferencesService _prefs;
+  final DeviceBiometrics biometrics;
+  AuthRepository(this._dio, this._secureStorage, this._prefs,
+      {DeviceBiometrics? biometrics})
+      : biometrics = biometrics ?? DeviceBiometrics();
 
-  AuthRepository(this._dio, this._secureStorage, this._prefs);
-
-  Future<AuthResponse> login(LoginRequest request) async {
-    try {
-      final response = await _dio.post(
-        ApiEndpoints.login,
-        data: request.toJson(),
-      );
-
-      final apiRes = ApiResponse<AuthResponse>.fromJson(
-        response.data as Map<String, dynamic>,
-        (data) => AuthResponse.fromJson(data as Map<String, dynamic>),
-      );
-
-      if (apiRes.success && apiRes.data != null) {
-        final authData = apiRes.data!;
-        await _secureStorage.saveTokens(
-          accessToken: authData.accessToken,
-          refreshToken: authData.refreshToken,
-        );
-        await _secureStorage.saveDeviceId(request.deviceId);
-        await _secureStorage.saveDeviceName(request.deviceName);
-        await _prefs.setSavedUsername(request.username);
-        await _prefs.setHasPin(authData.hasPin);
-        await _prefs.setBiometricEnabled(authData.biometricEnabled);
-
-        return authData;
-      } else {
-        throw AuthException(
-          message: apiRes.message.isNotEmpty ? apiRes.message : 'Login gagal',
-          errorCode: apiRes.errorCode,
-        );
-      }
-    } on DioException catch (e) {
-      _handleDioError(e);
-      rethrow;
+  Future<AuthResponse> _accept(
+      Response response, String username, int epoch) async {
+    if (_secureStorage.epoch != epoch) {
+      throw AuthException(message: 'Sesi sudah berubah');
     }
+    final root = response.data as Map<String, dynamic>;
+    if (root['success'] != true || root['data'] is! Map<String, dynamic>) {
+      throw AuthException(message: 'Respons login tidak valid');
+    }
+    final data = AuthResponse.fromJson(root['data'] as Map<String, dynamic>);
+    if (data.accessToken.isEmpty ||
+        data.refreshToken.isEmpty ||
+        data.user.id == 0) {
+      throw AuthException(message: 'Respons login tidak lengkap');
+    }
+    await _secureStorage.startSession(
+        accessToken: data.accessToken, refreshToken: data.refreshToken);
+    await _prefs.setSavedUsername(username);
+    await _prefs.setHasPin(false);
+    await _prefs.setBiometricEnabled(
+        data.biometricEnabled && await biometrics.hasKey());
+    return data;
   }
 
-  Future<AuthResponse> pinLogin(PinLoginRequest request) async {
+  Future<AuthResponse> login(LoginRequest request) =>
+      _secureStorage.exclusive(() async {
+        final epoch = _secureStorage.epoch;
+        try {
+          final response =
+              await _dio.post(ApiEndpoints.login, data: request.toJson());
+          await _secureStorage.saveDeviceId(request.deviceId);
+          await _secureStorage.saveDeviceName(request.deviceName);
+          return await _accept(response, request.username, epoch);
+        } on DioException catch (e) {
+          throw _error(e);
+        }
+      });
+
+  Future<void> enableBiometric(String deviceId, String password) async {
     try {
-      final response = await _dio.post(
-        ApiEndpoints.pinLogin,
-        data: request.toJson(),
-      );
-
-      final apiRes = ApiResponse<AuthResponse>.fromJson(
-        response.data as Map<String, dynamic>,
-        (data) => AuthResponse.fromJson(data as Map<String, dynamic>),
-      );
-
-      if (apiRes.success && apiRes.data != null) {
-        final authData = apiRes.data!;
-        await _secureStorage.saveTokens(
-          accessToken: authData.accessToken,
-          refreshToken: authData.refreshToken,
-        );
-        await _secureStorage.saveDeviceId(request.deviceId);
-        await _prefs.setSavedUsername(request.username);
-        await _prefs.setHasPin(authData.hasPin);
-        await _prefs.setBiometricEnabled(authData.biometricEnabled);
-
-        return authData;
-      } else {
-        throw AuthException(
-          message: apiRes.message.isNotEmpty ? apiRes.message : 'PIN salah',
-          errorCode: apiRes.errorCode,
-        );
+      final publicKey = await biometrics.createKey();
+      // Confirm the new key can perform a biometric-gated operation before registering it.
+      await biometrics.sign('zoom-monitor-api:enrollment-check:v1');
+      final response = await _dio.post(ApiEndpoints.biometricEnable, data: {
+        'device_id': deviceId,
+        'current_password': password,
+        'public_key': publicKey
+      });
+      if (response.data is! Map || response.data['success'] != true) {
+        throw AuthException(message: 'Pendaftaran biometrik gagal');
       }
-    } on DioException catch (e) {
-      _handleDioError(e);
-      rethrow;
-    }
-  }
-
-  Future<bool> setupPin(PinSetupRequest request) async {
-    try {
-      final response = await _dio.post(
-        ApiEndpoints.pinSetup,
-        data: request.toJson(),
-      );
-
-      final apiRes = ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
-      if (apiRes.success) {
-        await _prefs.setHasPin(true);
-        return true;
-      } else {
-        throw AuthException(
-          message: apiRes.message.isNotEmpty ? apiRes.message : 'Gagal setup PIN',
-          errorCode: apiRes.errorCode,
-        );
-      }
-    } on DioException catch (e) {
-      _handleDioError(e);
-      rethrow;
-    }
-  }
-
-  Future<String> enableBiometric(String deviceId) async {
-    try {
-      final response = await _dio.post(
-        ApiEndpoints.biometricEnable,
-        data: {'device_id': deviceId},
-      );
-
-      final rootData = response.data as Map<String, dynamic>? ?? {};
-      final data = (rootData['data'] is Map<String, dynamic>)
-          ? rootData['data'] as Map<String, dynamic>
-          : rootData;
-      final biometricToken = data['biometric_token'] as String? ??
-          rootData['biometric_token'] as String? ??
-          '';
-
-      if (biometricToken.isNotEmpty) {
-        await _secureStorage.storage.write(key: 'biometric_token', value: biometricToken);
-        await _prefs.setBiometricEnabled(true);
-      }
-
-      return biometricToken;
-    } on DioException catch (e) {
-      _handleDioError(e);
+      await _prefs.setBiometricEnabled(true);
+    } catch (e) {
+      await biometrics.deleteKey();
+      await _prefs.setBiometricEnabled(false);
+      if (e is DioException) throw _error(e);
       rethrow;
     }
   }
 
   Future<bool> disableBiometric(String deviceId) async {
     try {
-      await _dio.post(
-        ApiEndpoints.biometricDisable,
-        data: {'device_id': deviceId},
-      );
-      await _secureStorage.storage.delete(key: 'biometric_token');
+      await _dio
+          .post(ApiEndpoints.biometricDisable, data: {'device_id': deviceId});
+      await biometrics.deleteKey();
       await _prefs.setBiometricEnabled(false);
       return true;
     } on DioException catch (e) {
-      _handleDioError(e);
-      rethrow;
+      throw _error(e);
     }
   }
 
-  Future<AuthResponse> biometricLogin(BiometricLoginRequest request) async {
-    try {
-      final response = await _dio.post(
-        ApiEndpoints.biometricLogin,
-        data: request.toJson(),
-      );
-
-      final apiRes = ApiResponse<AuthResponse>.fromJson(
-        response.data as Map<String, dynamic>,
-        (data) => AuthResponse.fromJson(data as Map<String, dynamic>),
-      );
-
-      if (apiRes.success && apiRes.data != null) {
-        final authData = apiRes.data!;
-        await _secureStorage.saveTokens(
-          accessToken: authData.accessToken,
-          refreshToken: authData.refreshToken,
-        );
-        await _secureStorage.saveDeviceId(request.deviceId);
-        await _prefs.setSavedUsername(request.username);
-        await _prefs.setHasPin(authData.hasPin);
-        await _prefs.setBiometricEnabled(authData.biometricEnabled);
-
-        return authData;
-      } else {
-        throw AuthException(
-          message: apiRes.message.isNotEmpty ? apiRes.message : 'Login Biometrik gagal',
-          errorCode: apiRes.errorCode,
-        );
-      }
-    } on DioException catch (e) {
-      _handleDioError(e);
-      rethrow;
-    }
-  }
+  Future<AuthResponse> biometricLogin(
+          {required String username, required String deviceId}) =>
+      _secureStorage.exclusive(() async {
+        final epoch = _secureStorage.epoch;
+        try {
+          if (!await biometrics.hasKey()) {
+            throw AuthException(
+                message: 'Daftarkan biometrik setelah login password');
+          }
+          final response = await _dio.post(ApiEndpoints.biometricChallenge,
+              data: {'username': username, 'device_id': deviceId});
+          final root = response.data as Map<String, dynamic>;
+          final data = root['data'] as Map<String, dynamic>?;
+          if (root['success'] != true ||
+              data?['algorithm'] != 'ES256' ||
+              data?['challenge_id'] is! String ||
+              data?['challenge'] is! String) {
+            throw AuthException(message: 'Tantangan perangkat tidak valid');
+          }
+          final signature = await biometrics.sign(data!['challenge'] as String);
+          if (_secureStorage.epoch != epoch) {
+            throw AuthException(message: 'Sesi sudah berubah');
+          }
+          final signed = await _dio.post(ApiEndpoints.biometricLogin,
+              data: BiometricLoginRequest(
+                      username: username,
+                      deviceId: deviceId,
+                      challengeId: data['challenge_id'] as String,
+                      signature: signature)
+                  .toJson());
+          return await _accept(signed, username, epoch);
+        } on DioException catch (e) {
+          throw _error(e);
+        }
+      });
 
   Future<UserProfile?> getMe() async {
     try {
       final response = await _dio.get(ApiEndpoints.me);
-      final apiRes = ApiResponse<UserProfile>.fromJson(
-        response.data as Map<String, dynamic>,
-        (data) => UserProfile.fromJson(data as Map<String, dynamic>),
-      );
-
-      if (apiRes.success && apiRes.data != null) {
-        await _prefs.setHasPin(apiRes.data!.hasPin);
-        await _prefs.setBiometricEnabled(apiRes.data!.biometricEnabled);
-        return apiRes.data;
-      }
-      return null;
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
+      if (response.data is! Map ||
+          response.data['success'] != true ||
+          response.data['data'] is! Map<String, dynamic>) {
         return null;
       }
-      _handleDioError(e);
-      rethrow;
+      final user =
+          UserProfile.fromJson(response.data['data'] as Map<String, dynamic>);
+      await _prefs.setHasPin(false);
+      await _prefs.setBiometricEnabled(
+          user.biometricEnabled && await biometrics.hasKey());
+      return user.id > 0 ? user : null;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) return null;
+      throw _error(e);
     }
   }
 
   Future<void> logout() async {
+    final keepBiometric =
+        _prefs.isBiometricEnabled && await biometrics.hasKey();
+    var confirmedRetained = false;
     try {
-      await _dio.post(ApiEndpoints.logout);
-    } catch (_) {}
-    await _secureStorage.clearAuth();
+      final response = await _dio
+          .post(ApiEndpoints.logout, data: {'keep_biometric': keepBiometric});
+      final root = response.data;
+      confirmedRetained = keepBiometric &&
+          root is Map &&
+          root['success'] == true &&
+          root['data'] is Map &&
+          root['data']['biometric_retained'] == true;
+    } finally {
+      await _secureStorage.clearAuth();
+      if (!confirmedRetained) {
+        await _prefs.setBiometricEnabled(false);
+        await biometrics.deleteKey();
+      }
+    }
   }
 
-  void _handleDioError(DioException e) {
-    if (e.response != null && e.response?.data is Map<String, dynamic>) {
-      final map = e.response!.data as Map<String, dynamic>;
-      final message = map['message'] as String? ?? 'Terjadi kesalahan pada server';
-      final errorCode = map['error_code'] as String?;
-      throw AuthException(
-        message: message,
-        errorCode: errorCode,
-        statusCode: e.response?.statusCode,
-      );
-    }
-    throw AuthException(
-      message: e.message ?? 'Koneksi ke server gagal. Pastikan backend aktif.',
-      statusCode: e.response?.statusCode,
-    );
+  AuthException _error(DioException error) {
+    final data = error.response?.data;
+    return AuthException(
+        message: data is Map && data['message'] is String
+            ? data['message'] as String
+            : 'Koneksi gagal. Silakan coba lagi.',
+        errorCode: data is Map ? data['error_code'] as String? : null,
+        statusCode: error.response?.statusCode);
   }
 }

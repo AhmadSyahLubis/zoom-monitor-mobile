@@ -112,30 +112,29 @@ class _Metric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minHeight: 54),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.scaffoldLight,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          AppNavSymbol(kind: kind, color: color, size: 18),
-          const SizedBox(width: 7),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: AppColors.textMain, fontSize: 12),
+    return NeoInsetSurface(
+      radius: 12,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 54),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        child: Row(
+          children: [
+            AppNavSymbol(kind: kind, color: color, size: 18),
+            const SizedBox(width: 7),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: AppColors.textMain, fontSize: 12),
+              ),
             ),
-          ),
-          Text(
-            '$value',
-            style: AppType.cardTitle.copyWith(color: color),
-          ),
-        ],
+            Text(
+              '$value',
+              style: AppType.cardTitle.copyWith(color: color),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -52,7 +52,7 @@ class DashboardHero extends StatelessWidget {
               children: [
                 Positioned.fill(
                   child: Image.asset(
-                    'assets/images/meeting_console_hero.png',
+                    'assets/images/meeting_console_hero.webp',
                     cacheWidth: imageCacheWidth(
                       context,
                       MediaQuery.sizeOf(context).width,

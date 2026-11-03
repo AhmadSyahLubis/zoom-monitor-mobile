@@ -1,4 +1,7 @@
+import '../../../../core/models/meeting_monitoring.dart';
+
 class ScheduleItem {
+  final MeetingMonitoring? monitoring;
   final int id;
   final int meetingId;
   final int accountId;
@@ -15,6 +18,7 @@ class ScheduleItem {
   final String? occurrenceId;
 
   ScheduleItem({
+    this.monitoring,
     required this.id,
     required this.meetingId,
     required this.accountId,
@@ -31,10 +35,14 @@ class ScheduleItem {
     this.occurrenceId,
   });
 
-  bool get isRecurring => type == 8 || (occurrenceId != null && occurrenceId!.isNotEmpty);
+  bool get isRecurring => type == 3 || type == 8;
 
   factory ScheduleItem.fromJson(Map<String, dynamic> json) {
     return ScheduleItem(
+      monitoring: json['monitoring'] is Map<String, dynamic>
+          ? MeetingMonitoring.fromJson(
+              json['monitoring'] as Map<String, dynamic>)
+          : null,
       id: json['id'] as int? ?? 0,
       meetingId: (json['meeting_id'] is num)
           ? (json['meeting_id'] as num).toInt()
@@ -75,18 +83,27 @@ class ScheduleItem {
 }
 
 class SchedulesData {
+  final DateTime? observedAt;
+  final DateTime? serverTime;
+  final DateTime receivedAt;
+  bool get isStale => monitoringIsStale(observedAt, serverTime, receivedAt);
   final List<ScheduleItem> liveMeetings;
   final List<ScheduleItem> upcomingMeetings;
   final List<ScheduleItem> pastMeetings;
 
   SchedulesData({
+    this.observedAt,
+    this.serverTime,
+    DateTime? receivedAt,
     required this.liveMeetings,
     required this.upcomingMeetings,
     required this.pastMeetings,
-  });
+  }) : receivedAt = receivedAt ?? DateTime.now();
 
   factory SchedulesData.fromJson(Map<String, dynamic> json) {
     return SchedulesData(
+      observedAt: DateTime.tryParse(json['observed_at'] as String? ?? ''),
+      serverTime: DateTime.tryParse(json['server_time'] as String? ?? ''),
       liveMeetings: (json['live_meetings'] as List? ?? [])
           .map((e) => ScheduleItem.fromJson(e as Map<String, dynamic>))
           .toList(),

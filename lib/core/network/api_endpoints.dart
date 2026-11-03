@@ -4,11 +4,10 @@ class ApiEndpoints {
 
   // Auth Endpoints
   static const String login = '/auth/login';
-  static const String pinSetup = '/auth/pin/setup';
-  static const String pinLogin = '/auth/pin/login';
   static const String biometricEnable = '/auth/biometric/enable';
   static const String biometricDisable = '/auth/biometric/disable';
   static const String biometricLogin = '/auth/biometric/login';
+  static const String biometricChallenge = '/auth/biometric/challenge';
   static const String refresh = '/auth/refresh';
   static const String logout = '/auth/logout';
   static const String me = '/auth/me';
@@ -21,7 +20,8 @@ class ApiEndpoints {
   // Booking & Meetings
   static const String bookings = '/bookings';
   static const String searchAvailability = '/bookings/search';
-  static String meetingDetails(int accountId, int meetingId) => '/bookings/$accountId/$meetingId/details';
+  static String meetingDetails(int accountId, int meetingId) =>
+      '/bookings/$accountId/$meetingId/details';
   static String meetingById(dynamic meetingId) => '/bookings/$meetingId';
   static String endMeeting(dynamic meetingId) => '/bookings/$meetingId/end';
 

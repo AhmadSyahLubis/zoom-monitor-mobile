@@ -9,8 +9,10 @@ import '../../data/models/booking_request.dart';
 
 class BookingSuccessDialog extends StatelessWidget {
   final BookMeetingResponse meeting;
+  final String? accountName;
 
-  const BookingSuccessDialog({super.key, required this.meeting});
+  const BookingSuccessDialog(
+      {super.key, required this.meeting, this.accountName});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,8 @@ class BookingSuccessDialog extends StatelessWidget {
                   color: AppColors.primaryLight,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 36),
+                child: const Icon(Icons.check_circle_rounded,
+                    color: AppColors.primary, size: 36),
               ),
             ),
             const SizedBox(height: 16),
@@ -62,13 +65,16 @@ class BookingSuccessDialog extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _buildRow('Meeting ID', meeting.meetingId.toString(), isHighlight: true),
+                  _buildRow('Meeting ID', meeting.meetingId.toString(),
+                      isHighlight: true),
                   const Divider(height: 16),
                   _buildRow('Passcode', meeting.password),
                   const Divider(height: 16),
                   _buildRow(
                     'Host Key',
-                    meeting.hostKey?.isNotEmpty == true ? meeting.hostKey! : 'Tersedia di Zoom',
+                    meeting.hostKey?.isNotEmpty == true
+                        ? meeting.hostKey!
+                        : 'Tersedia di Zoom',
                     isBadge: true,
                   ),
                   const Divider(height: 16),
@@ -87,13 +93,14 @@ class BookingSuccessDialog extends StatelessWidget {
               onPressed: () {
                 final inviteText = InviteFormatter.formatInvite(
                   topic: meeting.topic,
-                  startTimeWib: DateTimeUtil.formatTimeOnlyWib(meeting.startTime),
+                  startTimeWib:
+                      DateTimeUtil.formatTimeOnlyWib(meeting.startTime),
                   endTimeWib: DateTimeUtil.formatTimeOnlyWib(
                     DateTimeUtil.parseToWib(meeting.startTime)
                         .add(Duration(minutes: meeting.duration))
                         .toIso8601String(),
                   ),
-                  accountName: meeting.accountName,
+                  accountName: accountName ?? meeting.accountName,
                   meetingId: meeting.meetingId.toString(),
                   passcode: meeting.password,
                   hostKey: meeting.hostKey,
@@ -101,10 +108,11 @@ class BookingSuccessDialog extends StatelessWidget {
                 );
 
                 Clipboard.setData(ClipboardData(text: inviteText));
-                UiFeedback.showSuccess(context, 'Undangan rapat berhasil disalin ke clipboard');
+                UiFeedback.showSuccess(
+                    context, 'Undangan rapat berhasil disalin ke clipboard');
               },
               icon: const Icon(Icons.copy_rounded, size: 18),
-              label: const Text('📋 Salin Undangan Rapat'),
+              label: const Text('Salin undangan rapat'),
             ),
             const SizedBox(height: 10),
 
@@ -127,7 +135,8 @@ class BookingSuccessDialog extends StatelessWidget {
 
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Selesai', style: TextStyle(color: AppColors.textMuted)),
+              child: const Text('Selesai',
+                  style: TextStyle(color: AppColors.textMuted)),
             ),
           ],
         ),
@@ -135,11 +144,13 @@ class BookingSuccessDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(String label, String value, {bool isHighlight = false, bool isBadge = false}) {
+  Widget _buildRow(String label, String value,
+      {bool isHighlight = false, bool isBadge = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
+        Text(label,
+            style: const TextStyle(fontSize: 13, color: AppColors.textMuted)),
         if (isBadge)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

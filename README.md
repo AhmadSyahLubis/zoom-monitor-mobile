@@ -47,13 +47,13 @@
 - **Size & Format Transparency**: Inspect MP4/M4A file sizes, recording dates, and duration.
 
 ### 6. 🔐 Enterprise Security & Hardware Biometrics
-- **Multi-Factor Device Auth**: Secure login via corporate credentials, 6-digit Device PIN, or Hardware Biometrics (Fingerprint / Face ID).
+- **Device Auth**: Secure password login and server challenge based hardware biometrics (Fingerprint / Face ID).
 - **Encrypted Local Storage**: Sensitive tokens stored via `FlutterSecureStorage` using hardware keystore/keychain (AES-256).
 - **Auto-Lock & Session Invalidation**: Automatic token refresh with defensive interceptors and secure logout.
 
-### 7. 🎨 Apple-Style Frosted Glass UI & Smooth Performance
-- **Frosted Glass Navigation**: Floating, blur-treated bottom navigation bar designed with proper safe-area padding.
-- **60 / 120 FPS Fluid Scrolling**: Zero-stutter scroll experience using in-memory RAM caching, deduplicated network fetches, and eager cache invalidation on mutations.
+### 7. 🎨 Corporate Neumorphic UI & Smooth Performance
+- **Shared Surface Language**: Cool blue raised cards and recessed selected controls match the web app; floating navigation uses a frosted layer on iOS and a painted surface on Android.
+- **Responsive Scrolling**: Compressed photo assets, list virtualization, in-memory caching, deduplicated fetches, and cache invalidation on mutations.
 - **Theme Consistency**: High-contrast, restrained enterprise color palette adhering to professional accessibility standards.
 
 ---
@@ -88,8 +88,8 @@ lib/
 │   ├── utils/           # Date formatting (Asia/Jakarta), invite generators
 │   └── widgets/         # Reusable glass nav bar, empty/error state widgets
 ├── features/
-│   ├── accounts/        # Zoom accounts list & specification screens
-│   ├── auth/            # Login, PIN setup, and biometric lock screens
+│   ├── account/         # Zoom accounts list & credential management
+│   ├── auth/            # Password login, biometric enrollment and session handling
 │   ├── booking/         # Schedules screen, booking dialog, edit meeting modal
 │   ├── dashboard/       # Real-time room status, quick stats, active meetings
 │   └── recordings/      # Cloud recording explorer, filter, and detail views
@@ -120,15 +120,17 @@ lib/
    ```
 
 3. **Configure API Base URL:**
-   By default, the app connects to the local development server. You can specify a custom API URL using `--dart-define`:
+   Release builds always connect to `https://zoom-api.sumutcerdas.web.id/api/v1`. For local backend development, override the URL at build time with `--dart-define`:
    ```bash
-   # Running on physical Android device connected via Wi-Fi:
+   # Running on physical Android device connected via Wi-Fi to the local API:
    flutter run --dart-define=API_BASE_URL=http://<YOUR_LOCAL_IP>:8080/api/v1
 
    # Running with ADB reverse port forwarding (USB):
    adb reverse tcp:8080 tcp:8080
    flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8080/api/v1
    ```
+
+   The login screen does not expose a server selector.
 
 ---
 
@@ -166,7 +168,7 @@ flutter analyze
 
 ## 🔗 Related Repositories
 - [API-ZoomMonitor](https://github.com/AhmadSyahLubis/API-ZoomMonitor) - High-performance Go Backend API
-- [zoom-monitor](https://github.com/AhmadSyahLubis/zoom-monitor) - Laravel Backend & Web Administration Dashboard
+- [FE-WebZoomMonitor](https://github.com/Project-Super-App-Diskominfo-Provsu/FE-WebZoomMonitor) - Web administration frontend and shared visual assets
 
 ---
 
@@ -179,3 +181,7 @@ This project is licensed under the [MIT License](LICENSE).
 ## 👤 Author
 
 Developed and maintained by **Ahmad Syah** ([@AhmadSyahLubis](https://github.com/AhmadSyahLubis)).
+
+## Pembaruan autentikasi API
+
+Alur PIN dan token biometrik statis sudah diganti dengan autentikasi sesi dan kunci perangkat. Lihat [kontrak dan panduan penerapan](docs/auth-v2-integration.md) sebelum membangun release. Password tidak disimpan oleh aplikasi, dan host key tidak dimasukkan ke undangan peserta yang dibagikan.

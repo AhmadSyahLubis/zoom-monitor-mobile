@@ -12,6 +12,7 @@ import '../../data/models/schedule_item.dart';
 import '../controllers/schedules_controller.dart';
 import '../widgets/edit_meeting_dialog.dart';
 import '../widgets/meeting_card.dart';
+import '../../../../core/widgets/monitoring_refresh.dart';
 
 class SchedulesScreen extends ConsumerStatefulWidget {
   const SchedulesScreen({super.key});
@@ -49,7 +50,7 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
     if (confirm) {
       final success = await ref
           .read(schedulesControllerProvider.notifier)
-          .endMeeting(meeting.meetingId);
+          .endMeeting(meeting.meetingId, accountId: meeting.accountId);
       if (mounted) {
         if (success) {
           UiFeedback.showSuccess(context, 'Rapat berhasil diakhiri');
@@ -81,7 +82,10 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
                   style: TextStyle(color: AppColors.textMuted)),
             ),
             OutlinedButton(
-              onPressed: () => Navigator.of(ctx).pop('occurrence'),
+              onPressed:
+                  meeting.occurrenceId == null || meeting.occurrenceId!.isEmpty
+                      ? null
+                      : () => Navigator.of(ctx).pop('occurrence'),
               child: const Text('Hapus Pertemuan Ini Saja'),
             ),
             ElevatedButton(
@@ -98,7 +102,10 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
       if (option != null) {
         final success = await ref
             .read(schedulesControllerProvider.notifier)
-            .deleteMeeting(meeting.meetingId, deleteOption: option);
+            .deleteMeeting(meeting.meetingId,
+                accountId: meeting.accountId,
+                deleteOption: option,
+                occurrenceId: meeting.occurrenceId);
         if (mounted) {
           if (success) {
             UiFeedback.showSuccess(context, 'Jadwal berhasil dihapus');
@@ -120,7 +127,8 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
       if (confirm) {
         final success = await ref
             .read(schedulesControllerProvider.notifier)
-            .deleteMeeting(meeting.meetingId, deleteOption: 'occurrence');
+            .deleteMeeting(meeting.meetingId,
+                accountId: meeting.accountId, deleteOption: 'all');
         if (mounted) {
           if (success) {
             UiFeedback.showSuccess(context, 'Jadwal berhasil dibatalkan');
@@ -133,6 +141,11 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
   }
 
   void _handleEditMeeting(ScheduleItem meeting) {
+    if (meeting.isRecurring) {
+      UiFeedback.showError(
+          context, 'Edit rapat berulang belum tersedia. Buat jadwal baru.');
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -143,72 +156,92 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
 
   @override
   Widget build(BuildContext context) {
-    final schedulesAsync = ref.watch(schedulesProvider);
-
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBody: true,
-      bottomNavigationBar: const AppGlassNavBar(currentIndex: 2),
-      appBar: AppBar(
-        flexibleSpace: const GlassAppBarBackground(),
-        title: const Text('Jadwal rapat'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(58),
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 9),
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: AppColors.borderLight),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              labelColor: Colors.white,
-              unselectedLabelColor: AppColors.textMuted,
-              indicatorSize: TabBarIndicatorSize.tab,
-              dividerColor: Colors.transparent,
-              indicator: BoxDecoration(
-                color: AppColors.primaryDark,
-                borderRadius: BorderRadius.circular(11),
+    return MonitoringRefresh(
+      refresh: () async {
+        ApiCacheManager().invalidate('bookings');
+        ref.invalidate(schedulesProvider);
+        await ref.read(schedulesProvider.future);
+      },
+      builder: (context) => Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBody: true,
+        bottomNavigationBar: const AppGlassNavBar(currentIndex: 2),
+        appBar: AppBar(
+          flexibleSpace: const GlassAppBarBackground(),
+          title: const Text('Jadwal rapat'),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(58),
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 9),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AppColors.neoBase,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: const Color(0xB3FFFFFF)),
+                boxShadow: NeoDepth.raised,
               ),
-              tabs: const [
-                Tab(height: 40, text: 'Live Rapat'),
-                Tab(height: 40, text: 'Mendatang'),
-                Tab(height: 40, text: 'Riwayat'),
-              ],
+              child: TabBar(
+                controller: _tabController,
+                labelColor: AppColors.primaryDark,
+                unselectedLabelColor: AppColors.textMuted,
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                indicator: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  borderRadius: BorderRadius.circular(11),
+                  border: Border.all(color: const Color(0xFFB8CCDE)),
+                ),
+                tabs: const [
+                  Tab(height: 40, text: 'Live Rapat'),
+                  Tab(height: 40, text: 'Mendatang'),
+                  Tab(height: 40, text: 'Riwayat'),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      body: schedulesAsync.when(
-        data: (data) => TabBarView(
-          controller: _tabController,
-          children: [
-            _buildMeetingList(
-              items: data.liveMeetings,
-              type: MeetingCardType.live,
-              emptyMessage: 'Tidak ada rapat yang sedang berlangsung saat ini.',
+        body: Consumer(builder: (context, ref, _) {
+          final schedulesAsync = ref.watch(schedulesProvider);
+          return schedulesAsync.when(
+            skipLoadingOnRefresh: true,
+            skipLoadingOnReload: true,
+            data: (data) => TabBarView(
+              controller: _tabController,
+              children: [
+                _buildMeetingList(
+                  items: data.liveMeetings,
+                  type: MeetingCardType.live,
+                  stale: data.isStale,
+                  emptyMessage:
+                      'Tidak ada rapat yang sedang berlangsung saat ini.',
+                ),
+                _buildMeetingList(
+                  items: data.upcomingMeetings,
+                  type: MeetingCardType.upcoming,
+                  stale: data.isStale,
+                  emptyMessage: 'Tidak ada jadwal rapat mendatang.',
+                ),
+                _buildMeetingList(
+                  items: data.pastMeetings,
+                  type: MeetingCardType.past,
+                  stale: data.isStale,
+                  emptyMessage:
+                      'Tidak ada jadwal yang telah terlewati dalam rentang ini.',
+                ),
+              ],
             ),
-            _buildMeetingList(
-              items: data.upcomingMeetings,
-              type: MeetingCardType.upcoming,
-              emptyMessage: 'Tidak ada jadwal rapat mendatang.',
+            loading: () => const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
-            _buildMeetingList(
-              items: data.pastMeetings,
-              type: MeetingCardType.past,
-              emptyMessage: 'Belum ada riwayat rapat yang selesai.',
+            error: (_, __) => LoadErrorState(
+              title: 'Jadwal belum dapat dimuat',
+              onRetry: () {
+                ApiCacheManager().invalidate('bookings');
+                ref.invalidate(schedulesProvider);
+              },
             ),
-          ],
-        ),
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        ),
-        error: (_, __) => LoadErrorState(
-          title: 'Jadwal belum dapat dimuat',
-          onRetry: () => ref.invalidate(schedulesProvider),
-        ),
+          );
+        }),
       ),
     );
   }
@@ -217,6 +250,7 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
     required List<ScheduleItem> items,
     required MeetingCardType type,
     required String emptyMessage,
+    bool stale = false,
   }) {
     if (items.isEmpty) {
       return RefreshIndicator(
@@ -227,10 +261,11 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
           await ref.read(schedulesProvider.future);
         },
         child: ListView(
+          key: PageStorageKey('schedule-empty-${type.name}'),
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
           children: [
             SectionPhotoBanner(
-              asset: 'assets/images/schedule_room.png',
+              asset: 'assets/images/schedule_room.webp',
               title: 'Agenda rapat',
               subtitle: emptyMessage,
             ),
@@ -253,12 +288,13 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
         await ref.read(schedulesProvider.future);
       },
       child: ListView.separated(
+        key: PageStorageKey('schedule-${type.name}'),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
         itemCount: items.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (ctx, idx) => idx == 0
             ? SectionPhotoBanner(
-                asset: 'assets/images/schedule_room.png',
+                asset: 'assets/images/schedule_room.webp',
                 title: type == MeetingCardType.live
                     ? 'Sedang berlangsung'
                     : type == MeetingCardType.upcoming
@@ -266,21 +302,23 @@ class _SchedulesScreenState extends ConsumerState<SchedulesScreen>
                         : 'Riwayat rapat',
                 subtitle: '${items.length} rapat dalam daftar',
               )
-            : RepaintBoundary(
-                child: MeetingCard(
-                  meeting: items[idx - 1],
-                  type: type,
-                  onEndMeeting: type == MeetingCardType.live
-                      ? () => _handleEndMeeting(items[idx - 1])
-                      : null,
-                  onEditMeeting: (type == MeetingCardType.upcoming ||
-                          type == MeetingCardType.live)
-                      ? () => _handleEditMeeting(items[idx - 1])
-                      : null,
-                  onDeleteMeeting: type == MeetingCardType.upcoming
-                      ? () => _handleDeleteMeeting(items[idx - 1])
-                      : null,
-                ),
+            : MeetingCard(
+                meeting: items[idx - 1],
+                type: type,
+                stale: stale,
+                onEndMeeting: type == MeetingCardType.live
+                    ? () => _handleEndMeeting(items[idx - 1])
+                    : null,
+                onEditMeeting:
+                    (items[idx - 1].monitoring?.scheduleKnown == true &&
+                            !items[idx - 1].isRecurring &&
+                            (type == MeetingCardType.upcoming ||
+                                type == MeetingCardType.live))
+                        ? () => _handleEditMeeting(items[idx - 1])
+                        : null,
+                onDeleteMeeting: type == MeetingCardType.upcoming
+                    ? () => _handleDeleteMeeting(items[idx - 1])
+                    : null,
               ),
       ),
     );

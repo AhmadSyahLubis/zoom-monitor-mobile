@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
-import '../../../../core/config/app_config.dart';
+import '../../../../core/providers/core_providers.dart';
 import '../../../../core/config/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/glass_surface.dart';
@@ -59,107 +59,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      final user = ref.read(authStateProvider).user;
-      if (user != null && !user.hasPin) {
-        context.go(AppRoutes.pinSetup);
-      } else {
-        context.go(AppRoutes.dashboard);
-      }
+      context.go(AppRoutes.dashboard);
     } else {
       final error = ref.read(authStateProvider).errorMessage ?? 'Login gagal';
       UiFeedback.showError(context, error);
     }
-  }
-
-  void _showServerConfigDialog() {
-    final controller = TextEditingController(text: AppConfig.baseUrl);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
-          children: [
-            Icon(PhosphorIconsRegular.hardDrives,
-                color: AppColors.primary, size: 22),
-            SizedBox(width: 8),
-            Text('Konfigurasi URL API',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Pilih atau masukkan alamat backend server:',
-              style: TextStyle(fontSize: 13, color: AppColors.textMuted),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Base URL Backend',
-                hintText: AppConfig.defaultBaseUrl,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: [
-                ActionChip(
-                  label: const Text('localhost:8080',
-                      style: TextStyle(fontSize: 11)),
-                  onPressed: () {
-                    controller.text = AppConfig.defaultBaseUrl;
-                  },
-                ),
-                ActionChip(
-                  label: const Text('127.0.0.1:8080',
-                      style: TextStyle(fontSize: 11)),
-                  onPressed: () {
-                    controller.text = 'http://127.0.0.1:8080/api/v1';
-                  },
-                ),
-                ActionChip(
-                  label: const Text('Emulator 10.0.2.2',
-                      style: TextStyle(fontSize: 11)),
-                  onPressed: () {
-                    controller.text = 'http://10.0.2.2:8080/api/v1';
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Batal',
-                style: TextStyle(color: AppColors.textMuted)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () {
-              final newUrl = controller.text.trim();
-              if (newUrl.isNotEmpty) {
-                AppConfig.customUrl = newUrl;
-                setState(() {});
-                Navigator.of(ctx).pop();
-                UiFeedback.showSuccess(
-                    context, 'Alamat server diatur ke $newUrl');
-              }
-            },
-            child: const Text('Simpan & Terapkan',
-                style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -182,69 +86,76 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: SizedBox(
-                          height: 150,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.asset(
-                                'assets/images/hybrid_desk_login.png',
-                                cacheWidth: imageCacheWidth(
-                                  context,
-                                  MediaQuery.sizeOf(context).width,
-                                ),
-                                fit: BoxFit.cover,
-                                alignment: Alignment.centerRight,
-                                excludeFromSemantics: true,
+                      Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              'assets/icons/zoom_monitor_app_icon.png',
+                              cacheWidth: imageCacheWidth(
+                                context,
+                                96,
+                                maxWidth: 256,
                               ),
-                              const DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomLeft,
-                                    end: Alignment.topRight,
-                                    colors: [
-                                      Color(0xD9182640),
-                                      Colors.transparent
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                left: 15,
-                                bottom: 15,
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(9),
-                                      child: Image.asset(
-                                        'assets/icons/zoom_monitor_app_icon.png',
-                                        cacheWidth: imageCacheWidth(
-                                          context,
-                                          84,
-                                          maxWidth: 256,
-                                        ),
-                                        width: 36,
-                                        height: 36,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 9),
-                                    const Text(
-                                      'Zoom Monitor',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                              width: 42,
+                              height: 42,
+                              semanticLabel: 'Ikon Zoom Monitor',
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'Zoom Monitor',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textMain,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      const Divider(height: 1),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/sumatera-utara.png',
+                            width: 29,
+                            height: 36,
+                            fit: BoxFit.contain,
+                            semanticLabel: 'Lambang Provinsi Sumatera Utara',
+                          ),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Pemerintah Provinsi\nSumatera Utara',
+                              style: TextStyle(
+                                fontSize: 11,
+                                height: 1.25,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textMain,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 125,
+                            height: 30,
+                            child: ColorFiltered(
+                              colorFilter: const ColorFilter.mode(
+                                Color(0xFF173D72),
+                                BlendMode.srcIn,
+                              ),
+                              child: Image.asset(
+                                'assets/images/kolaborasi-sumut-berkah.png',
+                                fit: BoxFit.contain,
+                                semanticLabel: 'Kolaborasi Sumut Berkah',
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 24),
                       const Text(
@@ -260,7 +171,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Akses akun dan jadwal rapat perusahaan.',
+                        'Akses akun dan jadwal rapat instansi.',
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.textMuted,
@@ -309,6 +220,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _usernameController,
+                        autofillHints: const [AutofillHints.username],
                         decoration: const InputDecoration(
                           hintText: 'Masukkan username',
                           prefixIcon: Icon(PhosphorIconsRegular.user,
@@ -331,12 +243,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _passwordController,
+                        autofillHints: const [AutofillHints.password],
+                        autocorrect: false,
+                        enableSuggestions: false,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Masukkan password',
                           prefixIcon: const Icon(PhosphorIconsRegular.lockKey,
                               color: AppColors.textMuted),
                           suffixIcon: IconButton(
+                            tooltip: _obscurePassword
+                                ? 'Tampilkan password'
+                                : 'Sembunyikan password',
                             icon: Icon(
                               _obscurePassword
                                   ? PhosphorIconsRegular.eyeSlash
@@ -372,6 +290,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 20),
 
                       const Divider(height: 1),
+                      if (ref
+                          .watch(preferencesServiceProvider)
+                          .isBiometricEnabled)
+                        Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: OutlinedButton.icon(
+                              onPressed: authState.isLoading
+                                  ? null
+                                  : () async {
+                                      final ok = await ref
+                                          .read(authStateProvider.notifier)
+                                          .loginWithBiometric();
+                                      if (context.mounted && ok) {
+                                        context.go(AppRoutes.dashboard);
+                                      }
+                                    },
+                              icon:
+                                  const Icon(PhosphorIconsRegular.fingerprint),
+                              label: const Text('Masuk dengan biometrik'),
+                            )),
                       const SizedBox(height: 13),
                       Row(
                         children: [
@@ -387,34 +325,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 8),
-
-                      InkWell(
-                        onTap: _showServerConfigDialog,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 7),
-                          child: Row(
-                            children: [
-                              const Icon(PhosphorIconsRegular.hardDrives,
-                                  size: 17, color: AppColors.primary),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Server: ${AppConfig.baseUrl}',
-                                  style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w600),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const Icon(PhosphorIconsRegular.pencilSimple,
-                                  size: 14, color: AppColors.primary),
-                            ],
-                          ),
-                        ),
                       ),
                     ],
                   ),

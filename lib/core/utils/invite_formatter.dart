@@ -21,9 +21,6 @@ class InviteFormatter {
     buffer.writeln('');
     buffer.writeln('🆔 Meeting ID: $meetingId');
     buffer.writeln('🔑 Passcode: $passcode');
-    if (hostKey != null && hostKey.isNotEmpty) {
-      buffer.writeln('🛡️ Host Key: $hostKey (Gunakan untuk klaim host)');
-    }
     buffer.writeln('--------------------------------------------------');
     buffer.writeln('Mohon hadir 5 menit sebelum rapat dimulai. Terima kasih.');
     return buffer.toString();

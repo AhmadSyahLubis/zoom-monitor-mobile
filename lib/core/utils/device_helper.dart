@@ -1,47 +1,42 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DeviceHelper {
   static final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
+  static Future<String>? _installationId;
 
   /// Mendapatkan Device ID unik yang stabil
   static Future<String> getDeviceId() async {
+    return _installationId ??= _createInstallationId();
+  }
+
+  static Future<String> _createInstallationId() async {
     final prefs = await SharedPreferences.getInstance();
-    const key = 'cached_device_id';
+    const key = 'installation_device_id_v2';
     final cached = prefs.getString(key);
     if (cached != null && cached.isNotEmpty) {
       return cached;
     }
 
-    String deviceId = '';
-    try {
-      if (kIsWeb) {
-        final web = await _deviceInfo.webBrowserInfo;
-        deviceId = 'web-${web.userAgent.hashCode.abs()}';
-      } else if (Platform.isAndroid) {
-        final android = await _deviceInfo.androidInfo;
-        deviceId = android.id.isNotEmpty ? android.id : 'android-${android.model.hashCode.abs()}';
-      } else if (Platform.isIOS) {
-        final ios = await _deviceInfo.iosInfo;
-        deviceId = ios.identifierForVendor ?? 'ios-${ios.name.hashCode.abs()}';
-      } else if (Platform.isWindows) {
-        final win = await _deviceInfo.windowsInfo;
-        deviceId = win.deviceId.isNotEmpty ? win.deviceId : 'win-${win.computerName.hashCode.abs()}';
-      } else {
-        deviceId = 'device-${DateTime.now().millisecondsSinceEpoch}';
-      }
-    } catch (_) {
-      deviceId = 'device-${DateTime.now().millisecondsSinceEpoch}';
-    }
+    final random = Random.secure();
+    final deviceId =
+        'mobile-${List.generate(32, (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0')).join()}';
 
     await prefs.setString(key, deviceId);
+    await prefs.remove('cached_device_id');
     return deviceId;
   }
 
   /// Mendapatkan nama perangkat yang human-readable
   static Future<String> getDeviceName() async {
+    return _readDeviceName()
+        .timeout(const Duration(seconds: 2), onTimeout: () => 'Flutter Device');
+  }
+
+  static Future<String> _readDeviceName() async {
     try {
       if (kIsWeb) {
         final web = await _deviceInfo.webBrowserInfo;

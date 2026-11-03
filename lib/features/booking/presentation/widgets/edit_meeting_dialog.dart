@@ -159,7 +159,7 @@ class _EditMeetingDialogState extends ConsumerState<EditMeetingDialog> {
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.neoBase,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
@@ -399,9 +399,18 @@ class _EditMeetingDialogState extends ConsumerState<EditMeetingDialog> {
                 initialValue: _recurringType,
                 decoration: const InputDecoration(labelText: 'Tipe Perulangan'),
                 items: const [
-                  DropdownMenuItem(value: 1, child: Text('Harian (Daily)', overflow: TextOverflow.ellipsis)),
-                  DropdownMenuItem(value: 2, child: Text('Mingguan (Weekly)', overflow: TextOverflow.ellipsis)),
-                  DropdownMenuItem(value: 3, child: Text('Bulanan (Monthly)', overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(
+                      value: 1,
+                      child: Text('Harian (Daily)',
+                          overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(
+                      value: 2,
+                      child: Text('Mingguan (Weekly)',
+                          overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(
+                      value: 3,
+                      child: Text('Bulanan (Monthly)',
+                          overflow: TextOverflow.ellipsis)),
                 ],
                 onChanged: (val) {
                   if (val != null) setState(() => _recurringType = val);

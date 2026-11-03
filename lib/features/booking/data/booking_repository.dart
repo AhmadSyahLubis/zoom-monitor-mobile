@@ -6,6 +6,14 @@ import 'models/availability_result.dart';
 import 'models/booking_request.dart';
 import 'models/schedule_item.dart';
 
+class BookingFailure implements Exception {
+  final String message;
+  final String? code;
+  const BookingFailure(this.message, this.code);
+  @override
+  String toString() => message;
+}
+
 class BookingRepository {
   final Dio _dio;
   final ApiCacheManager _cacheManager;
@@ -35,18 +43,21 @@ class BookingRepository {
             },
           );
 
-          final apiRes = ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
+          final apiRes = ApiResponse<dynamic>.fromJson(
+              response.data as Map<String, dynamic>);
           if (apiRes.success && apiRes.data != null) {
             if (apiRes.data is List) {
               return (apiRes.data as List)
-                  .map((e) => AvailabilityResult.fromJson(e as Map<String, dynamic>))
+                  .map((e) =>
+                      AvailabilityResult.fromJson(e as Map<String, dynamic>))
                   .toList();
             }
           }
           return [];
         } on DioException catch (e) {
           final msg = e.response?.data is Map<String, dynamic>
-              ? (e.response!.data['message'] as String? ?? 'Gagal mencari ketersediaan')
+              ? (e.response!.data['message'] as String? ??
+                  'Gagal mencari ketersediaan')
               : (e.message ?? 'Gagal mencari ketersediaan');
           throw Exception(msg);
         }
@@ -63,7 +74,10 @@ class BookingRepository {
 
       final apiRes = ApiResponse<BookMeetingResponse>.fromJson(
         response.data as Map<String, dynamic>,
-        (data) => BookMeetingResponse.fromJson(data as Map<String, dynamic>),
+        (data) => BookMeetingResponse.fromJson(
+          data as Map<String, dynamic>,
+          accountId: request.accountId,
+        ),
       );
 
       if (apiRes.success && apiRes.data != null) {
@@ -72,12 +86,17 @@ class BookingRepository {
         _cacheManager.invalidate('dashboard');
         return apiRes.data!;
       }
-      throw Exception(apiRes.message.isNotEmpty ? apiRes.message : 'Gagal membuat rapat');
+      throw Exception(
+          apiRes.message.isNotEmpty ? apiRes.message : 'Gagal membuat rapat');
     } on DioException catch (e) {
       final msg = e.response?.data is Map<String, dynamic>
-              ? (e.response!.data['message'] as String? ?? 'Gagal membuat rapat')
-              : (e.message ?? 'Gagal membuat rapat');
-      throw Exception(msg);
+          ? (e.response!.data['message'] as String? ?? 'Gagal membuat rapat')
+          : (e.message ?? 'Gagal membuat rapat');
+      throw BookingFailure(
+          msg,
+          e.response?.data is Map<String, dynamic>
+              ? e.response!.data['error_code'] as String?
+              : null);
     }
   }
 
@@ -97,10 +116,12 @@ class BookingRepository {
           if (apiRes.success && apiRes.data != null) {
             return apiRes.data!;
           }
-          return SchedulesData(liveMeetings: [], upcomingMeetings: [], pastMeetings: []);
+          return SchedulesData(
+              liveMeetings: [], upcomingMeetings: [], pastMeetings: []);
         } on DioException catch (e) {
           final msg = e.response?.data is Map<String, dynamic>
-              ? (e.response!.data['message'] as String? ?? 'Gagal mengambil jadwal')
+              ? (e.response!.data['message'] as String? ??
+                  'Gagal mengambil jadwal')
               : (e.message ?? 'Gagal mengambil jadwal');
           throw Exception(msg);
         }
@@ -108,10 +129,14 @@ class BookingRepository {
     );
   }
 
-  Future<bool> endMeeting(dynamic meetingId) async {
+  Future<bool> endMeeting(dynamic meetingId, {required int accountId}) async {
     try {
-      final response = await _dio.post(ApiEndpoints.endMeeting(meetingId));
-      final apiRes = ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
+      final response = await _dio.post(
+        ApiEndpoints.endMeeting(meetingId),
+        data: {'account_id': accountId},
+      );
+      final apiRes =
+          ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
       if (apiRes.success) {
         _cacheManager.invalidate('bookings');
         _cacheManager.invalidate('availability');
@@ -126,13 +151,15 @@ class BookingRepository {
     }
   }
 
-  Future<bool> updateMeeting(dynamic meetingId, UpdateMeetingRequest request) async {
+  Future<bool> updateMeeting(
+      dynamic meetingId, UpdateMeetingRequest request) async {
     try {
       final response = await _dio.put(
         ApiEndpoints.meetingById(meetingId),
         data: request.toJson(),
       );
-      final apiRes = ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
+      final apiRes =
+          ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
       if (apiRes.success) {
         _cacheManager.invalidate('bookings');
         _cacheManager.invalidate('availability');
@@ -141,19 +168,36 @@ class BookingRepository {
       return apiRes.success;
     } on DioException catch (e) {
       final msg = e.response?.data is Map<String, dynamic>
-          ? (e.response!.data['message'] as String? ?? 'Gagal memperbarui rapat')
+          ? (e.response!.data['message'] as String? ??
+              'Gagal memperbarui rapat')
           : (e.message ?? 'Gagal memperbarui rapat');
       throw Exception(msg);
     }
   }
 
-  Future<bool> deleteMeeting(dynamic meetingId, {String deleteOption = 'occurrence'}) async {
+  Future<bool> deleteMeeting(dynamic meetingId,
+      {required int accountId,
+      required String deleteOption,
+      String? occurrenceId}) async {
+    if (deleteOption != 'all' && deleteOption != 'occurrence') {
+      throw ArgumentError('Pilihan penghapusan rapat tidak valid');
+    }
+    if (deleteOption == 'occurrence' &&
+        (occurrenceId == null || occurrenceId.isEmpty)) {
+      throw ArgumentError(
+          'ID kejadian rapat wajib diisi untuk penghapusan sesi');
+    }
     try {
       final response = await _dio.delete(
         ApiEndpoints.meetingById(meetingId),
-        queryParameters: {'delete_option': deleteOption},
+        data: {
+          'account_id': accountId,
+          'delete_option': deleteOption,
+          if (deleteOption == 'occurrence') 'occurrence_id': occurrenceId,
+        },
       );
-      final apiRes = ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
+      final apiRes =
+          ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
       if (apiRes.success) {
         _cacheManager.invalidate('bookings');
         _cacheManager.invalidate('availability');
@@ -162,7 +206,8 @@ class BookingRepository {
       return apiRes.success;
     } on DioException catch (e) {
       final msg = e.response?.data is Map<String, dynamic>
-          ? (e.response!.data['message'] as String? ?? 'Gagal membatalkan rapat')
+          ? (e.response!.data['message'] as String? ??
+              'Gagal membatalkan rapat')
           : (e.message ?? 'Gagal membatalkan rapat');
       throw Exception(msg);
     }

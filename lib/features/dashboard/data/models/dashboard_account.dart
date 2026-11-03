@@ -1,4 +1,11 @@
+import '../../../../core/models/meeting_monitoring.dart';
+
 class DashboardAccount {
+  final MeetingMonitoring? monitoring;
+  final DateTime? serverTime;
+  final DateTime receivedAt;
+  final int liveCount;
+  bool get isStale => monitoringIsStale(lastUpdated, serverTime, receivedAt);
   final int id;
   final String accountName;
   final String? email;
@@ -10,6 +17,10 @@ class DashboardAccount {
   final DateTime lastUpdated;
 
   DashboardAccount({
+    this.monitoring,
+    this.serverTime,
+    DateTime? receivedAt,
+    this.liveCount = 0,
     required this.id,
     required this.accountName,
     this.email,
@@ -19,19 +30,26 @@ class DashboardAccount {
     required this.meetingCapacity,
     required this.planType,
     required this.lastUpdated,
-  });
+  }) : receivedAt = receivedAt ?? DateTime.now();
 
   factory DashboardAccount.fromJson(Map<String, dynamic> json) {
     return DashboardAccount(
+      monitoring: json['monitoring'] is Map<String, dynamic>
+          ? MeetingMonitoring.fromJson(
+              json['monitoring'] as Map<String, dynamic>)
+          : null,
+      serverTime: DateTime.tryParse(json['server_time'] as String? ?? ''),
+      liveCount: json['live_count'] as int? ?? 0,
       id: json['id'] as int? ?? 0,
       accountName: json['account_name'] as String? ?? 'Akun Zoom',
       email: json['email'] as String?,
       hostKey: json['host_key'] as String?,
-      status: (json['status'] as String? ?? 'available').toLowerCase(),
+      status: (json['status'] as String? ?? 'error').toLowerCase(),
       currentTopic: json['current_topic'] as String?,
       meetingCapacity: json['meeting_capacity'] as int? ?? 300,
       planType: json['plan_type'] as String? ?? 'Licensed',
-      lastUpdated: DateTime.tryParse(json['last_updated'] as String? ?? '') ?? DateTime.now(),
+      lastUpdated: DateTime.tryParse(json['last_updated'] as String? ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
     );
   }
 

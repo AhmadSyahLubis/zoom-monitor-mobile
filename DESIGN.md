@@ -17,11 +17,11 @@ Zoom Monitor is a mobile operations app for coordinating company Zoom Premium ac
 | Deep blue | `#173D72` | Primary actions and focus |
 | Clear blue | `#087EAE` | Availability and selected detail |
 | Soft blue | `#E8F4FA` | Quiet emphasis |
-| Canvas | `#F2F5F9` | Screen background |
-| White | `#FFFFFF` | Cards, forms, dialogs |
+| Neumorphic base | `#EAF0F7` | Screen, cards, forms, and dialogs |
+| White | `#FFFFFF` | Upper-left light edge and selected highlights |
 | Ink | `#14273E` | Main copy |
 | Muted | `#536579` | Supporting copy |
-| Border | `#D8E2EB` | Card and field structure |
+| Edge | `#71859E` | Input boundaries and focus structure |
 
 Semantic states retain separate text and background colors in `lib/core/theme/app_colors.dart`. Availability uses restrained teal, active meeting muted red, and scheduled muted amber. Always pair color with a written state.
 
@@ -33,11 +33,12 @@ The five bottom navigation symbols, status symbols, and selected action symbols 
 
 ## Surfaces and assets
 
-- The bottom navigation is the single persistent frosted layer. Its selected destination is a solid navy capsule with a white icon and label. Header action controls may use a light translucent surface. Content cards and forms are solid white.
+- Cards, forms, and dialogs use the same cool blue base as the canvas. Paired short light and dark shadows raise primary surfaces; selected navigation, metrics, and compact detail wells use an inset edge. Keep this depth restrained so repeated cards remain easy to scan and scroll.
+- The bottom navigation remains the only persistent floating layer. On iOS it may use a light frosted treatment; on Android it uses an opaque painted surface to avoid continuous backdrop blur. Its selected destination uses an inset surface and navy icon and label. Header action controls use a raised surface.
 - The home page starts with a light greeting, then a navy photographic action panel. This separates orientation from action and gives the photo room without covering the operational data. Account totals use a real proportional status strip rather than a decorative chart.
 - Dashboard and login use meeting imagery; Search, Schedules, Recordings, and Accounts each use one compact editorial banner relevant to the page. The photo sits behind a navy legibility layer and never replaces operational data. Generation prompts are recorded in `assets/images/ASSET_SOURCES.md`.
 - Empty states use four original vector scenes: account credentials, time search, calendar, and recording playback. Their repeated aperture detail links them to the app identity without implying unavailable data.
-- Data cards remain opaque and scannable. Search leads with availability, schedules lead with date and topic, recordings group playback metadata, and accounts group connection status with account ID. Radius is 10–20 px by component role; the floating navigation uses 26 px. Shadows stay subtle.
+- Data cards remain opaque and scannable. Search leads with availability, schedules lead with date and topic, recordings group playback metadata, and accounts group connection status with account ID. Radius is 10–20 px by component role; the floating navigation uses 24 px. Use the paired shadows on primary surfaces only, with inset detail kept small.
 - Motion is brief and functional, around 200 ms. Loading, empty, error, and success states need useful text and actions.
 
 ## Product truth

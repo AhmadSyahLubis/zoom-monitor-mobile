@@ -19,7 +19,8 @@ class AccountRepository {
       fetcher: () async {
         try {
           final response = await _dio.get(ApiEndpoints.accounts);
-          final apiRes = ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
+          final apiRes = ApiResponse<dynamic>.fromJson(
+              response.data as Map<String, dynamic>);
           if (apiRes.success && apiRes.data != null) {
             if (apiRes.data is List) {
               return (apiRes.data as List)
@@ -30,7 +31,8 @@ class AccountRepository {
           return [];
         } on DioException catch (e) {
           final msg = e.response?.data is Map<String, dynamic>
-              ? (e.response!.data['message'] as String? ?? 'Gagal mengambil akun Zoom')
+              ? (e.response!.data['message'] as String? ??
+                  'Gagal mengambil akun Zoom')
               : (e.message ?? 'Gagal mengambil akun Zoom');
           throw Exception(msg);
         }
@@ -53,10 +55,13 @@ class AccountRepository {
           if (apiRes.success && apiRes.data != null) {
             return apiRes.data!;
           }
-          throw Exception(apiRes.message.isNotEmpty ? apiRes.message : 'Akun tidak ditemukan');
+          throw Exception(apiRes.message.isNotEmpty
+              ? apiRes.message
+              : 'Akun tidak ditemukan');
         } on DioException catch (e) {
           final msg = e.response?.data is Map<String, dynamic>
-              ? (e.response!.data['message'] as String? ?? 'Gagal mengambil detail akun')
+              ? (e.response!.data['message'] as String? ??
+                  'Gagal mengambil detail akun')
               : (e.message ?? 'Gagal mengambil detail akun');
           throw Exception(msg);
         }
@@ -67,7 +72,8 @@ class AccountRepository {
   Future<bool> createAccount(Map<String, dynamic> data) async {
     try {
       final response = await _dio.post(ApiEndpoints.accounts, data: data);
-      final apiRes = ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
+      final apiRes =
+          ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
       if (apiRes.success) {
         _cacheManager.invalidate('accounts');
         _cacheManager.invalidate('dashboard');
@@ -75,7 +81,8 @@ class AccountRepository {
       return apiRes.success;
     } on DioException catch (e) {
       final msg = e.response?.data is Map<String, dynamic>
-          ? (e.response!.data['message'] as String? ?? 'Gagal menambahkan akun Zoom')
+          ? (e.response!.data['message'] as String? ??
+              'Gagal menambahkan akun Zoom')
           : (e.message ?? 'Gagal menambahkan akun Zoom');
       throw Exception(msg);
     }
@@ -84,7 +91,8 @@ class AccountRepository {
   Future<bool> updateAccount(int id, Map<String, dynamic> data) async {
     try {
       final response = await _dio.put(ApiEndpoints.accountById(id), data: data);
-      final apiRes = ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
+      final apiRes =
+          ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
       if (apiRes.success) {
         _cacheManager.invalidate('accounts');
         _cacheManager.invalidate('account:status:$id');
@@ -94,7 +102,8 @@ class AccountRepository {
       return apiRes.success;
     } on DioException catch (e) {
       final msg = e.response?.data is Map<String, dynamic>
-          ? (e.response!.data['message'] as String? ?? 'Gagal memperbarui akun Zoom')
+          ? (e.response!.data['message'] as String? ??
+              'Gagal memperbarui akun Zoom')
           : (e.message ?? 'Gagal memperbarui akun Zoom');
       throw Exception(msg);
     }
@@ -103,7 +112,8 @@ class AccountRepository {
   Future<bool> deleteAccount(int id) async {
     try {
       final response = await _dio.delete(ApiEndpoints.accountById(id));
-      final apiRes = ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
+      final apiRes =
+          ApiResponse<dynamic>.fromJson(response.data as Map<String, dynamic>);
       if (apiRes.success) {
         _cacheManager.invalidate('accounts');
         _cacheManager.invalidate('account:status:$id');
@@ -113,7 +123,8 @@ class AccountRepository {
       return apiRes.success;
     } on DioException catch (e) {
       final msg = e.response?.data is Map<String, dynamic>
-          ? (e.response!.data['message'] as String? ?? 'Gagal menghapus akun Zoom')
+          ? (e.response!.data['message'] as String? ??
+              'Gagal menghapus akun Zoom')
           : (e.message ?? 'Gagal menghapus akun Zoom');
       throw Exception(msg);
     }
@@ -139,10 +150,12 @@ class AccountRepository {
           'success': root['success'],
       };
 
+      _cacheManager.invalidate('accounts');
       return CheckConnectionResponse.fromJson(merged);
     } on DioException catch (e) {
       final msg = e.response?.data is Map<String, dynamic>
-          ? (e.response!.data['message'] as String? ?? 'Gagal menguji koneksi akun')
+          ? (e.response!.data['message'] as String? ??
+              'Gagal menguji koneksi akun')
           : (e.message ?? 'Gagal menguji koneksi akun');
       return CheckConnectionResponse(
         isConnected: false,

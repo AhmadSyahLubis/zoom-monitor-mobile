@@ -32,8 +32,8 @@ class SearchParams {
   int get hashCode => date.hashCode ^ startTime.hashCode ^ duration.hashCode;
 }
 
-final searchAvailabilityProvider =
-    FutureProvider.autoDispose.family<List<AvailabilityResult>, SearchParams>((ref, params) async {
+final searchAvailabilityProvider = FutureProvider.autoDispose
+    .family<List<AvailabilityResult>, SearchParams>((ref, params) async {
   final repo = ref.watch(bookingRepositoryProvider);
   return repo.searchAvailability(
     date: params.date,
@@ -43,23 +43,27 @@ final searchAvailabilityProvider =
 });
 
 class BookingState {
+  final String? errorCode;
   final bool isLoading;
   final String? errorMessage;
   final BookMeetingResponse? lastSuccess;
 
   BookingState({
+    this.errorCode,
     this.isLoading = false,
     this.errorMessage,
     this.lastSuccess,
   });
 
   BookingState copyWith({
+    String? errorCode,
     bool? isLoading,
     String? errorMessage,
     BookMeetingResponse? lastSuccess,
     bool clearError = false,
   }) {
     return BookingState(
+      errorCode: clearError ? null : errorCode,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       lastSuccess: lastSuccess ?? this.lastSuccess,
@@ -79,12 +83,16 @@ class BookingController extends StateNotifier<BookingState> {
       state = state.copyWith(isLoading: false, lastSuccess: res);
       return res;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(
+          isLoading: false,
+          errorMessage: e.toString(),
+          errorCode: e is BookingFailure ? e.code : null);
       return null;
     }
   }
 }
 
-final bookingControllerProvider = StateNotifierProvider<BookingController, BookingState>((ref) {
+final bookingControllerProvider =
+    StateNotifierProvider<BookingController, BookingState>((ref) {
   return BookingController(ref.watch(bookingRepositoryProvider));
 });

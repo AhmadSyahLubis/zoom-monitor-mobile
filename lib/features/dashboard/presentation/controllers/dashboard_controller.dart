@@ -27,9 +27,7 @@ class DashboardController
       state = AsyncValue.data(accounts);
     } catch (e, st) {
       if (!mounted) return;
-      if (!state.hasValue) {
-        state = AsyncValue.error(e, st);
-      }
+      state = AsyncValue.error(e, st);
     }
   }
 

@@ -3,46 +3,48 @@ class BookMeetingRequest {
   final String topic;
   final String startTime;
   final int duration;
-  final String timezone;
   final bool isRecurring;
   final int? recurringType; // 1 = Daily, 2 = Weekly, 3 = Monthly
   final int? repeatInterval;
-  final int? endTimes;
   final String? endDateTime;
   final bool ignoreConflict;
+  final bool confirmReservedSchedule;
+  final String bookingUserId;
 
   BookMeetingRequest({
     required this.accountId,
     required this.topic,
     required this.startTime,
     required this.duration,
-    this.timezone = 'Asia/Jakarta',
     this.isRecurring = false,
     this.recurringType,
     this.repeatInterval,
-    this.endTimes,
     this.endDateTime,
     this.ignoreConflict = false,
+    this.confirmReservedSchedule = false,
+    this.bookingUserId = '',
   });
 
   Map<String, dynamic> toJson() {
+    final wib = DateTime.parse(startTime).toUtc().add(const Duration(hours: 7));
+    String two(int value) => value.toString().padLeft(2, '0');
     final map = <String, dynamic>{
+      'booking_user_id': bookingUserId,
+      'date': '${wib.year}-${two(wib.month)}-${two(wib.day)}',
+      'time': '${two(wib.hour)}:${two(wib.minute)}',
+      'confirm_reserved_schedule': confirmReservedSchedule,
       'account_id': accountId,
       'topic': topic,
-      'start_time': startTime,
       'duration': duration,
-      'timezone': timezone,
       'is_recurring': isRecurring,
       'ignore_conflict': ignoreConflict,
     };
 
     if (isRecurring) {
       if (recurringType != null) {
-        map['recurring_type'] = recurringType;
         map['recurrence_type'] = recurringType;
       }
       if (repeatInterval != null) map['repeat_interval'] = repeatInterval;
-      if (endTimes != null) map['end_times'] = endTimes;
       if (endDateTime != null && endDateTime!.isNotEmpty) {
         map['end_date_time'] = endDateTime;
       }
@@ -87,7 +89,6 @@ class UpdateMeetingRequest {
     if (isRecurring) {
       if (recurrenceType != null) {
         map['recurrence_type'] = recurrenceType;
-        map['recurring_type'] = recurrenceType;
       }
       if (repeatInterval != null) map['repeat_interval'] = repeatInterval;
       if (weeklyDays != null) map['weekly_days'] = weeklyDays;
@@ -125,13 +126,16 @@ class BookMeetingResponse {
     this.hostKey,
   });
 
-  factory BookMeetingResponse.fromJson(Map<String, dynamic> json) {
+  factory BookMeetingResponse.fromJson(Map<String, dynamic> json,
+      {int? accountId}) {
     return BookMeetingResponse(
       id: json['id'] as int? ?? 0,
       meetingId: (json['meeting_id'] is num)
           ? (json['meeting_id'] as num).toInt()
-          : int.tryParse(json['meeting_id']?.toString() ?? '') ?? 0,
-      accountId: json['account_id'] as int? ?? 0,
+          : int.tryParse(json['meeting_id']?.toString() ?? '') ??
+              (json['id'] as num?)?.toInt() ??
+              0,
+      accountId: json['account_id'] as int? ?? accountId ?? 0,
       accountName: json['account_name'] as String? ?? 'Akun Zoom',
       topic: json['topic'] as String? ?? '',
       startTime: json['start_time'] as String? ?? '',

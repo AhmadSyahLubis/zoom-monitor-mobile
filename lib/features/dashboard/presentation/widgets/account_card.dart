@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/monitoring_labels.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -46,18 +47,17 @@ class AccountCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Center(
-                        child: AppNavSymbol(
-                          kind: AppNavSymbolKind.accounts,
-                          color: AppColors.primaryDark,
-                          size: 21,
+                    const NeoInsetSurface(
+                      radius: 12,
+                      child: SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: Center(
+                          child: AppNavSymbol(
+                            kind: AppNavSymbolKind.accounts,
+                            color: AppColors.primaryDark,
+                            size: 21,
+                          ),
                         ),
                       ),
                     ),
@@ -100,7 +100,8 @@ class AccountCard extends StatelessWidget {
                   runSpacing: 7,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    StatusBadge(status: account.status),
+                    StatusBadge(
+                        status: account.isStale ? 'error' : account.status),
                     if (account.planType.isNotEmpty)
                       Text(
                         account.planType,
@@ -120,6 +121,12 @@ class AccountCard extends StatelessWidget {
                       ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                MonitoringLabels(
+                    monitoring: account.monitoring, stale: account.isStale),
+                if (account.liveCount > 1)
+                  Text('${account.liveCount} meeting live pada akun ini',
+                      style: const TextStyle(fontSize: 12)),
                 if (account.currentTopic?.isNotEmpty == true) ...[
                   const SizedBox(height: 14),
                   Container(
@@ -169,7 +176,9 @@ class AccountCard extends StatelessWidget {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        'Diperbarui ${DateTimeUtil.formatTimeOnlyWib(account.lastUpdated.toIso8601String())}',
+                        account.lastUpdated.year < 2000
+                            ? 'Belum ada pemeriksaan Zoom yang berhasil'
+                            : 'Diperiksa ${DateTimeUtil.formatTimeOnlyWib(account.lastUpdated.toIso8601String())}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

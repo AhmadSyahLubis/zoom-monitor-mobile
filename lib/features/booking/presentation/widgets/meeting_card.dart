@@ -8,6 +8,7 @@ import '../../../../core/theme/glass_surface.dart';
 import '../../../../core/utils/date_time_util.dart';
 import '../../../../core/utils/invite_formatter.dart';
 import '../../../../core/utils/ui_feedback.dart';
+import '../../../../core/widgets/monitoring_labels.dart';
 import '../../data/models/schedule_item.dart';
 
 enum MeetingCardType { live, upcoming, past }
@@ -18,6 +19,7 @@ class MeetingCard extends StatelessWidget {
   final VoidCallback? onEndMeeting;
   final VoidCallback? onEditMeeting;
   final VoidCallback? onDeleteMeeting;
+  final bool stale;
 
   const MeetingCard({
     super.key,
@@ -26,6 +28,7 @@ class MeetingCard extends StatelessWidget {
     this.onEndMeeting,
     this.onEditMeeting,
     this.onDeleteMeeting,
+    this.stale = false,
   });
 
   @override
@@ -83,6 +86,8 @@ class MeetingCard extends StatelessWidget {
                   ),
               ],
             ),
+            const SizedBox(height: 8),
+            MonitoringLabels(monitoring: meeting.monitoring, stale: stale),
             const SizedBox(height: 13),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,7 +160,9 @@ class MeetingCard extends StatelessWidget {
                   const SizedBox(width: 7),
                   Expanded(
                     child: Text(
-                      '${DateTimeUtil.formatTimeOnlyWib(meeting.startTime)} · ${meeting.duration} mnt',
+                      meeting.startTime.isEmpty
+                          ? 'Jadwal belum diketahui'
+                          : '${DateTimeUtil.formatTimeOnlyWib(meeting.startTime)} sampai ${DateTimeUtil.formatTimeOnlyWib(meeting.endTime)} · ${meeting.duration} mnt',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -318,17 +325,18 @@ class MeetingCard extends StatelessWidget {
             border: Border.all(
                 color: AppColors.statusMeeting.withValues(alpha: 0.3)),
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(PhosphorIconsFill.record,
+              const Icon(PhosphorIconsFill.record,
                   size: 10, color: AppColors.statusMeeting),
-              SizedBox(width: 4),
-              Text('LIVE SEKARANG',
-                  style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.statusMeeting)),
+              const SizedBox(width: 4),
+              Flexible(
+                  child: Text(stale ? 'LIVE TERAKHIR' : 'LIVE',
+                      style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.statusMeeting))),
             ],
           ),
         );
@@ -341,7 +349,7 @@ class MeetingCard extends StatelessWidget {
             border: Border.all(
                 color: AppColors.statusScheduled.withValues(alpha: 0.3)),
           ),
-          child: const Text('MENDATANG',
+          child: const Text('TERJADWAL',
               style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
@@ -354,7 +362,7 @@ class MeetingCard extends StatelessWidget {
             color: AppColors.statusErrorBg,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: const Text('SELESAI',
+          child: const Text('JADWAL TERLEWATI',
               style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,

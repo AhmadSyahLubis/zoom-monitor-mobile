@@ -112,9 +112,7 @@ class AccountsScreen extends ConsumerWidget {
                 final account = accounts[idx - 1];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: RepaintBoundary(
-                    child: _buildAccountItem(context, ref, account),
-                  ),
+                  child: _buildAccountItem(context, ref, account),
                 );
               },
             );
@@ -140,9 +138,9 @@ class AccountsScreen extends ConsumerWidget {
 
   Widget _buildAccountsHeader(int count) {
     return SectionPhotoBanner(
-      asset: 'assets/images/accounts_workstation.png',
-      title: 'Akun perusahaan',
-      subtitle: '$count akun terhubung · Kelola koneksi dan aksesnya.',
+      asset: 'assets/images/accounts_workstation.webp',
+      title: 'Akun Zoom instansi',
+      subtitle: '$count akun terdaftar · Kelola koneksi dan aksesnya.',
     );
   }
 
@@ -221,7 +219,7 @@ class AccountsScreen extends ConsumerWidget {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: account.isActive
+                      color: account.hasToken
                           ? AppColors.statusAvailable
                           : AppColors.statusError,
                       shape: BoxShape.circle,
@@ -229,9 +227,9 @@ class AccountsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 7),
                   Text(
-                    account.isActive ? 'Aktif' : 'Nonaktif',
+                    account.hasToken ? 'Token tersimpan' : 'Belum ada token',
                     style: TextStyle(
-                      color: account.isActive
+                      color: account.hasToken
                           ? AppColors.statusAvailable
                           : AppColors.statusError,
                       fontSize: 12,
@@ -241,7 +239,7 @@ class AccountsScreen extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'ID ${account.zoomAccountId}',
+                      'ID #${account.id}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.right,

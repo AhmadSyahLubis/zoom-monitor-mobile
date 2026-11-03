@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/monitoring_labels.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
@@ -14,6 +15,7 @@ import '../../data/models/availability_result.dart';
 import '../controllers/booking_controller.dart';
 import '../widgets/booking_dialog.dart';
 import '../widgets/conflict_banner.dart';
+import '../widgets/reserved_schedule_notice.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -125,7 +127,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SectionPhotoBanner(
-              asset: 'assets/images/search_availability.png',
+              asset: 'assets/images/search_availability.webp',
               title: 'Cari slot kosong',
               subtitle: 'Periksa akun yang siap untuk rapat Anda.',
             ),
@@ -185,9 +187,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 12),
                             decoration: BoxDecoration(
-                              color: AppColors.scaffoldLight,
+                              color: AppColors.neoBase,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppColors.borderLight),
+                              border: Border.all(color: AppColors.neoEdge),
                             ),
                             child: Row(
                               children: [
@@ -227,9 +229,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 12),
                             decoration: BoxDecoration(
-                              color: AppColors.scaffoldLight,
+                              color: AppColors.neoBase,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppColors.borderLight),
+                              border: Border.all(color: AppColors.neoEdge),
                             ),
                             child: Row(
                               children: [
@@ -513,7 +515,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 Expanded(
                   child: Text(
                     isAvailable
-                        ? 'Siap dipakai'
+                        ? 'Jadwal tidak bentrok'
                         : isError
                             ? 'Belum dapat diperiksa'
                             : result.conflictingMeeting != null
@@ -548,6 +550,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ],
 
+            const SizedBox(height: 8),
+            Text(result.details,
+                style:
+                    const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+            if (result.liveMeeting?.monitoring != null ||
+                result.conflictingMeeting?.monitoring != null)
+              const Text('Kondisi pada pemeriksaan terakhir:',
+                  style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+            MonitoringLabels(
+                monitoring: result.conflictingMeeting?.monitoring ??
+                    result.liveMeeting?.monitoring),
+            if (result.needsReservationConfirmation) ...[
+              const SizedBox(height: 8),
+              const ReservedScheduleNotice(),
+            ],
             // Detail konflik jika ada
             if (!isAvailable && result.conflictingMeeting != null) ...[
               const SizedBox(height: 12),

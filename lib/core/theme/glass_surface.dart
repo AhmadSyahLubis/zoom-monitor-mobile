@@ -1,6 +1,59 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
+class NeoDepth {
+  static const raised = <BoxShadow>[
+    BoxShadow(
+      color: Color(0x80BDCADB),
+      blurRadius: 10,
+      offset: Offset(4, 4),
+    ),
+    BoxShadow(
+      color: Color(0xEDFFFFFF),
+      blurRadius: 10,
+      offset: Offset(-4, -4),
+    ),
+  ];
+
+  static const insetEdge = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    stops: [0, 0.55, 1],
+    colors: [Color(0xFFBECBDD), AppColors.neoBase, Colors.white],
+  );
+}
+
+class NeoInsetSurface extends StatelessWidget {
+  const NeoInsetSurface({
+    super.key,
+    required this.child,
+    this.radius = 14,
+    this.padding = const EdgeInsets.all(2),
+  });
+
+  final Widget child;
+  final double radius;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: NeoDepth.insetEdge,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        child: Padding(
+          padding: padding,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.neoBase,
+              borderRadius: BorderRadius.circular(radius - 2),
+            ),
+            child: child,
+          ),
+        ),
+      );
+}
+
 class AppBackdrop extends StatelessWidget {
   const AppBackdrop({super.key, required this.child});
 
@@ -9,13 +62,7 @@ class AppBackdrop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF8FAFC), AppColors.scaffoldLight],
-        ),
-      ),
+      decoration: const BoxDecoration(color: AppColors.neoBase),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
@@ -49,19 +96,13 @@ class GlassSurface extends StatelessWidget {
       margin: margin,
       padding: padding,
       decoration: BoxDecoration(
-        color: const Color(0xEEFFFFFF),
+        color: const Color(0xF2EAF0F7),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: Colors.white,
+          color: const Color(0xB3FFFFFF),
           width: 1.2,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryDark.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        boxShadow: NeoDepth.raised,
       ),
       child: child,
     );
@@ -75,7 +116,7 @@ class GlassAppBarBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AppColors.neoBase,
         border: Border(
           bottom: BorderSide(
             color: AppColors.borderLight.withValues(alpha: 0.8),
@@ -109,16 +150,10 @@ class ContentSurface extends StatelessWidget {
       margin: margin,
       padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.neoBase,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.8)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryDark.withValues(alpha: 0.035),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        border: Border.all(color: const Color(0xB3FFFFFF)),
+        boxShadow: NeoDepth.raised,
       ),
       child: child,
     );
@@ -143,20 +178,23 @@ class GlassIconButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 3),
       child: Tooltip(
         message: tooltip,
-        child: Material(
-          color: const Color(0xF2FFFFFF),
-          shape: RoundedRectangleBorder(
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.neoBase,
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.9)),
+            border: Border.all(color: const Color(0xB3FFFFFF)),
+            boxShadow: NeoDepth.raised,
           ),
-          elevation: 1,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: onPressed,
-            child: SizedBox(
-              width: 44,
-              height: 44,
-              child: Icon(icon, size: 19, color: AppColors.textMain),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: onPressed,
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Icon(icon, size: 19, color: AppColors.textMain),
+              ),
             ),
           ),
         ),

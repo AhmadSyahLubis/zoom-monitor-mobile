@@ -2,70 +2,141 @@ import 'package:dio/dio.dart';
 import '../config/app_config.dart';
 import '../storage/secure_storage_service.dart';
 
-class AuthInterceptor extends QueuedInterceptor {
+class AuthInterceptor extends Interceptor {
   final SecureStorageService secureStorage;
   final Dio dio;
+  final Dio refreshDio;
+  Future<String>? _refresh;
+  AuthInterceptor(
+      {required this.secureStorage, required this.dio, Dio? refreshDio})
+      : refreshDio = refreshDio ??
+            Dio(BaseOptions(
+              connectTimeout: AppConfig.connectTimeout,
+              receiveTimeout: AppConfig.receiveTimeout,
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+            ));
 
-  AuthInterceptor({required this.secureStorage, required this.dio});
+  bool _public(String path) => const [
+        '/auth/login',
+        '/auth/refresh',
+        '/auth/biometric/challenge',
+        '/auth/biometric/login'
+      ].contains(path);
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
-    options.baseUrl = AppConfig.baseUrl;
-    final token = await secureStorage.getAccessToken();
-    final deviceId = await secureStorage.getDeviceId();
+  void onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
+    try {
+      if (!options.path.startsWith('/') ||
+          options.path.startsWith('//') ||
+          options.path.contains('\\')) {
+        throw StateError('Endpoint API tidak valid');
+      }
+      options.baseUrl = AppConfig.baseUrl;
+      options.extra.putIfAbsent('authEpoch', () => secureStorage.epoch);
+      if (options.extra['authEpoch'] != secureStorage.epoch) {
+        throw StateError('Sesi sudah berubah');
+      }
+      final token = await secureStorage.getAccessToken();
+      if (!_public(options.path) && (token == null || token.isEmpty)) {
+        throw StateError('Silakan login kembali');
+      }
+      if (!_public(options.path) && token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      } else {
+        options.headers.remove('Authorization');
+      }
+      options.headers.remove('X-Device-ID');
+      handler.next(options);
+    } catch (e) {
+      handler.reject(DioException(
+          requestOptions: options, error: e, type: DioExceptionType.cancel));
+    }
+  }
 
-    if (token != null && token.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $token';
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    if (response.requestOptions.extra['authEpoch'] != secureStorage.epoch) {
+      handler.reject(DioException(
+          requestOptions: response.requestOptions,
+          type: DioExceptionType.cancel));
+      return;
     }
-    if (deviceId != null && deviceId.isNotEmpty) {
-      options.headers['X-Device-ID'] = deviceId;
+    handler.next(response);
+  }
+
+  Future<String> _refreshOnce(int epoch) async {
+    if (_refresh != null) return _refresh!;
+    final pending = secureStorage.exclusive(() async {
+      if (secureStorage.epoch != epoch) throw StateError('Sesi sudah berubah');
+      final token = await secureStorage.getRefreshToken();
+      final device = await secureStorage.getDeviceId();
+      if (token == null || device == null) {
+        throw StateError('Silakan login kembali');
+      }
+      final response = await refreshDio.post(
+          '${AppConfig.baseUrl}/auth/refresh',
+          data: {'refresh_token': token, 'device_id': device});
+      if (secureStorage.epoch != epoch) throw StateError('Sesi sudah berubah');
+      final root = response.data as Map<String, dynamic>;
+      final data = root['data'] as Map<String, dynamic>?;
+      if (root['success'] != true ||
+          data?['access_token'] is! String ||
+          data?['refresh_token'] is! String) {
+        throw StateError('Respons refresh tidak valid');
+      }
+      await secureStorage.saveTokens(
+          accessToken: data!['access_token'] as String,
+          refreshToken: data['refresh_token'] as String);
+      return data['access_token'] as String;
+    });
+    _refresh = pending;
+    try {
+      return await pending;
+    } catch (_) {
+      if (secureStorage.epoch == epoch) await secureStorage.clearAuth();
+      rethrow;
+    } finally {
+      if (identical(_refresh, pending)) _refresh = null;
     }
-    return handler.next(options);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    // Jika menerima 401 Unauthorized dan bukan dari endpoint auth itu sendiri
-    if (err.response?.statusCode == 401 && !err.requestOptions.path.contains('/auth/')) {
-      final refreshToken = await secureStorage.getRefreshToken();
-      final deviceId = await secureStorage.getDeviceId();
-
-      if (refreshToken != null && deviceId != null) {
-        try {
-          final refreshDio = Dio(BaseOptions(
-            baseUrl: AppConfig.baseUrl,
-            connectTimeout: AppConfig.connectTimeout,
-            receiveTimeout: AppConfig.receiveTimeout,
-            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-          ));
-
-          final response = await refreshDio.post('/auth/refresh', data: {
-            'refresh_token': refreshToken,
-            'device_id': deviceId,
-          });
-
-          if (response.statusCode == 200 && response.data['success'] == true) {
-            final data = response.data['data'];
-            final newAccessToken = data['access_token'] as String;
-            final newRefreshToken = data['refresh_token'] as String;
-
-            // Simpan token baru hasil rotasi
-            await secureStorage.saveTokens(
-              accessToken: newAccessToken,
-              refreshToken: newRefreshToken,
-            );
-
-            // Perbarui header request asli dan retry
-            err.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-            final retryResponse = await dio.fetch(err.requestOptions);
-            return handler.resolve(retryResponse);
-          }
-        } catch (_) {
-          // Token rotasi gagal / dicabut -> Hapus token lokal untuk paksa login
-          await secureStorage.clearAuth();
-        }
-      }
+    final options = err.requestOptions;
+    if (options.extra['authEpoch'] != secureStorage.epoch ||
+        _public(options.path) ||
+        err.response?.statusCode != 401) {
+      handler.next(err);
+      return;
     }
-    return handler.next(err);
+    final data = err.response?.data;
+    if (data is Map && data['error_code'] == 'AUTH_FAILED') {
+      handler.next(err);
+      return;
+    }
+    if (data is! Map ||
+        data['error_code'] != 'TOKEN_EXPIRED' ||
+        options.extra['authRetry'] == true) {
+      await secureStorage.clearAuth();
+      handler.next(err);
+      return;
+    }
+    options.extra['authRetry'] = true;
+    try {
+      final current = await secureStorage.getAccessToken();
+      if (options.headers['Authorization'] == 'Bearer $current') {
+        await _refreshOnce(secureStorage.epoch);
+      }
+      if (options.extra['authEpoch'] != secureStorage.epoch) {
+        throw StateError('Sesi sudah berubah');
+      }
+      handler.resolve(await dio.fetch(options));
+    } catch (e) {
+      handler.next(e is DioException ? e : err);
+    }
   }
 }

@@ -8,8 +8,7 @@ import 'features/account/data/models/zoom_account.dart';
 import 'features/account/presentation/screens/account_form_screen.dart';
 import 'features/account/presentation/screens/accounts_screen.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
-import 'features/auth/presentation/screens/pin_login_screen.dart';
-import 'features/auth/presentation/screens/pin_setup_screen.dart';
+import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'features/auth/presentation/screens/splash_screen.dart';
 import 'features/booking/presentation/screens/schedules_screen.dart';
 import 'features/booking/presentation/screens/search_screen.dart';
@@ -17,8 +16,27 @@ import 'features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'features/recording/presentation/screens/recordings_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: AppRoutes.splash,
+    redirect: (context, route) {
+      final auth = ref.read(authStateProvider);
+      final path = route.uri.path;
+      if (!auth.isInitialized) {
+        return path == AppRoutes.splash ? null : AppRoutes.splash;
+      }
+      if (!auth.isAuthenticated) {
+        return path == AppRoutes.login ? null : AppRoutes.login;
+      }
+      if ([
+        AppRoutes.splash,
+        AppRoutes.login,
+        AppRoutes.pinLogin,
+        AppRoutes.pinSetup
+      ].contains(path)) {
+        return AppRoutes.dashboard;
+      }
+      return null;
+    },
     routes: [
       GoRoute(
         path: AppRoutes.splash,
@@ -30,11 +48,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.pinLogin,
-        builder: (context, state) => const PinLoginScreen(),
+        redirect: (context, state) => AppRoutes.login,
       ),
       GoRoute(
         path: AppRoutes.pinSetup,
-        builder: (context, state) => const PinSetupScreen(),
+        redirect: (context, state) => AppRoutes.login,
       ),
       GoRoute(
         path: AppRoutes.dashboard,
@@ -80,6 +98,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  ref.listen(authStateProvider, (previous, next) {
+    if (previous?.isAuthenticated != next.isAuthenticated ||
+        previous?.isInitialized != next.isInitialized) {
+      router.refresh();
+    }
+  });
+  ref.onDispose(router.dispose);
+  return router;
 });
 
 class ZoomMonitorApp extends ConsumerWidget {

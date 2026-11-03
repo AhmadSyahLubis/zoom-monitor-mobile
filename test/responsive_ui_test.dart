@@ -163,7 +163,7 @@ void main() {
             padding: const EdgeInsets.all(16),
             children: const [
               SectionPhotoBanner(
-                asset: 'assets/images/search_availability.png',
+                asset: 'assets/images/search_availability.webp',
                 title: 'Cari slot kosong',
                 subtitle: 'Periksa akun yang siap untuk rapat Anda.',
               ),

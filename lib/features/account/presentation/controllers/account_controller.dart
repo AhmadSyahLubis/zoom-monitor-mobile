@@ -50,7 +50,9 @@ class AccountController extends StateNotifier<AccountFormState> {
       final success = await _repository.createAccount(data);
       state = state.copyWith(isLoading: false);
       _ref.invalidate(accountsListProvider);
-      _ref.read(dashboardAccountsProvider.notifier).loadDashboard(forceRefresh: true);
+      _ref
+          .read(dashboardAccountsProvider.notifier)
+          .loadDashboard(forceRefresh: true);
       return success;
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
@@ -64,7 +66,9 @@ class AccountController extends StateNotifier<AccountFormState> {
       final success = await _repository.updateAccount(id, data);
       state = state.copyWith(isLoading: false);
       _ref.invalidate(accountsListProvider);
-      _ref.read(dashboardAccountsProvider.notifier).loadDashboard(forceRefresh: true);
+      _ref
+          .read(dashboardAccountsProvider.notifier)
+          .loadDashboard(forceRefresh: true);
       return success;
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
@@ -78,7 +82,9 @@ class AccountController extends StateNotifier<AccountFormState> {
       final success = await _repository.deleteAccount(id);
       state = state.copyWith(isLoading: false);
       _ref.invalidate(accountsListProvider);
-      _ref.read(dashboardAccountsProvider.notifier).loadDashboard(forceRefresh: true);
+      _ref
+          .read(dashboardAccountsProvider.notifier)
+          .loadDashboard(forceRefresh: true);
       return success;
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
@@ -91,6 +97,7 @@ class AccountController extends StateNotifier<AccountFormState> {
     try {
       final result = await _repository.checkConnection(id);
       state = state.copyWith(isLoading: false, connectionResult: result);
+      _ref.invalidate(accountsListProvider);
       return result;
     } catch (e) {
       final fallback = CheckConnectionResponse(
@@ -104,6 +111,7 @@ class AccountController extends StateNotifier<AccountFormState> {
   }
 }
 
-final accountControllerProvider = StateNotifierProvider<AccountController, AccountFormState>((ref) {
+final accountControllerProvider =
+    StateNotifierProvider<AccountController, AccountFormState>((ref) {
   return AccountController(ref.watch(accountRepositoryProvider), ref);
 });

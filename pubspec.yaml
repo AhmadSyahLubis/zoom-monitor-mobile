@@ -22,7 +22,6 @@ dependencies:
   shared_preferences: ^2.2.3
 
   # Hardware Biometrics & Hardware Identification
-  local_auth: ^2.2.0
   device_info_plus: ^10.1.0
 
   # Routing & Deep Linking

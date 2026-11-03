@@ -10,6 +10,7 @@ import '../../data/models/booking_request.dart';
 import '../controllers/booking_controller.dart';
 import '../controllers/schedules_controller.dart';
 import 'booking_success_dialog.dart';
+import 'reserved_schedule_notice.dart';
 
 class BookingDialog extends ConsumerStatefulWidget {
   final AvailabilityResult accountResult;
@@ -37,6 +38,11 @@ class _BookingDialogState extends ConsumerState<BookingDialog> {
   late DateTime _startDate;
   late DateTime _endDate;
   bool _ignoreConflict = false;
+  bool _reservationConfirmed = false;
+  bool _serverRequiresConfirmation = false;
+  bool get _needsReservationConfirmation =>
+      _serverRequiresConfirmation ||
+      widget.accountResult.needsReservationConfirmation;
 
   @override
   void initState() {
@@ -91,6 +97,13 @@ class _BookingDialogState extends ConsumerState<BookingDialog> {
   }
 
   Future<void> _submitBooking() async {
+    if (_ignoreConflict &&
+        _needsReservationConfirmation &&
+        !_reservationConfirmed) {
+      UiFeedback.showError(context,
+          'Konfirmasikan lebih dahulu bahwa rapat sebelumnya tidak akan dilanjutkan.');
+      return;
+    }
     final topic = _topicController.text.trim();
     if (topic.isEmpty) {
       UiFeedback.showError(context, 'Topik rapat wajib diisi');
@@ -100,7 +113,7 @@ class _BookingDialogState extends ConsumerState<BookingDialog> {
     // Susun ISO 8601 UTC string dari date dan start_time WIB (UTC+7)
     final dateParts = widget.date.split('-');
     final timeParts = widget.startTime.split(':');
-    final wibDateTime = DateTime(
+    final wibDateTime = DateTime.utc(
       int.parse(dateParts[0]),
       int.parse(dateParts[1]),
       int.parse(dateParts[2]),
@@ -115,20 +128,23 @@ class _BookingDialogState extends ConsumerState<BookingDialog> {
     String? endUtcIso;
     if (_isRecurring) {
       final endWib =
-          DateTime(_endDate.year, _endDate.month, _endDate.day, 23, 59, 59);
-      endUtcIso = endWib.subtract(const Duration(hours: 7)).toIso8601String();
+          DateTime.utc(_endDate.year, _endDate.month, _endDate.day, 23, 59, 59);
+      endUtcIso = endWib
+          .subtract(const Duration(hours: 7))
+          .toIso8601String()
+          .replaceFirst(RegExp(r'\.\d{3}Z$'), 'Z');
     }
 
     final req = BookMeetingRequest(
       accountId: widget.accountResult.account.id,
+      bookingUserId: widget.accountResult.bookingUserId,
+      confirmReservedSchedule: _ignoreConflict && _reservationConfirmed,
       topic: topic,
       startTime: utcIso,
       duration: widget.duration,
-      timezone: 'Asia/Jakarta',
       isRecurring: _isRecurring,
       recurringType: _isRecurring ? _recurringType : null,
       repeatInterval: _isRecurring ? _repeatInterval : null,
-      endTimes: _isRecurring ? _approximateSessions : null,
       endDateTime: endUtcIso,
       ignoreConflict: _ignoreConflict,
     );
@@ -147,9 +163,19 @@ class _BookingDialogState extends ConsumerState<BookingDialog> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (ctx) => BookingSuccessDialog(meeting: res),
+        builder: (ctx) => BookingSuccessDialog(
+          meeting: res,
+          accountName: widget.accountResult.account.name,
+        ),
       );
     } else {
+      if (ref.read(bookingControllerProvider).errorCode ==
+          'RESERVATION_CONFIRMATION_REQUIRED') {
+        setState(() {
+          _serverRequiresConfirmation = true;
+          _reservationConfirmed = false;
+        });
+      }
       final err = ref.read(bookingControllerProvider).errorMessage ??
           'Gagal membuat rapat';
       UiFeedback.showError(context, err);
@@ -168,7 +194,7 @@ class _BookingDialogState extends ConsumerState<BookingDialog> {
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.neoBase,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
@@ -260,12 +286,20 @@ class _BookingDialogState extends ConsumerState<BookingDialog> {
               DropdownButtonFormField<int>(
                 isExpanded: true,
                 initialValue: _recurringType,
-                decoration:
-                    const InputDecoration(labelText: 'Tipe Perulangan'),
+                decoration: const InputDecoration(labelText: 'Tipe Perulangan'),
                 items: const [
-                  DropdownMenuItem(value: 1, child: Text('Harian (Daily)', overflow: TextOverflow.ellipsis)),
-                  DropdownMenuItem(value: 2, child: Text('Mingguan (Weekly)', overflow: TextOverflow.ellipsis)),
-                  DropdownMenuItem(value: 3, child: Text('Bulanan (Monthly)', overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(
+                      value: 1,
+                      child: Text('Harian (Daily)',
+                          overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(
+                      value: 2,
+                      child: Text('Mingguan (Weekly)',
+                          overflow: TextOverflow.ellipsis)),
+                  DropdownMenuItem(
+                      value: 3,
+                      child: Text('Bulanan (Monthly)',
+                          overflow: TextOverflow.ellipsis)),
                 ],
                 onChanged: (val) {
                   if (val != null) setState(() => _recurringType = val);
@@ -407,8 +441,20 @@ class _BookingDialogState extends ConsumerState<BookingDialog> {
             const SizedBox(height: 20),
 
             // Submit Button
+            if (_needsReservationConfirmation) ...[
+              ReservedScheduleNotice(
+                  checked: _reservationConfirmed,
+                  onChanged: (value) =>
+                      setState(() => _reservationConfirmed = value)),
+              const SizedBox(height: 12),
+            ],
             ElevatedButton(
-              onPressed: state.isLoading ? null : _submitBooking,
+              onPressed: state.isLoading ||
+                      (_ignoreConflict &&
+                          _needsReservationConfirmation &&
+                          !_reservationConfirmed)
+                  ? null
+                  : _submitBooking,
               child: state.isLoading
                   ? const SizedBox(
                       height: 20,

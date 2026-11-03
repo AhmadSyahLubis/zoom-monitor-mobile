@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:local_auth/local_auth.dart';
+
 import '../../../../core/network/api_cache_manager.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../../../core/storage/preferences_service.dart';
@@ -70,263 +70,15 @@ class AuthController extends StateNotifier<AuthState> {
   final SecureStorageService _secureStorage;
   final PreferencesService _prefs;
   final Ref _ref;
-  final LocalAuthentication _localAuth = LocalAuthentication();
 
   AuthController(this._repo, this._secureStorage, this._prefs, this._ref)
       : super(AuthState()) {
+    _secureStorage.onSessionInvalidated = _sessionInvalidated;
     checkInitialAuth();
   }
 
-  Future<void> checkInitialAuth() async {
-    state = state.copyWith(isLoading: true, clearError: true);
-    try {
-      final token = await _secureStorage.getAccessToken();
-      if (token == null || token.isEmpty) {
-        state = state.copyWith(
-            isLoading: false, isInitialized: true, clearUser: true);
-        return;
-      }
-
-      final profile = await _repo.getMe();
-      if (profile != null) {
-        state = state.copyWith(
-          user: profile,
-          isLoading: false,
-          isInitialized: true,
-        );
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          isInitialized: true,
-          clearUser: true,
-        );
-      }
-    } catch (_) {
-      state = state.copyWith(
-        isLoading: false,
-        isInitialized: true,
-        clearUser: true,
-      );
-    }
-  }
-
-  Future<bool> loginWithPassword({
-    required String username,
-    required String password,
-  }) async {
-    state = state.copyWith(isLoading: true, clearError: true);
-    try {
-      final deviceId = await DeviceHelper.getDeviceId();
-      final deviceName = await DeviceHelper.getDeviceName();
-
-      final res = await _repo.login(LoginRequest(
-        username: username,
-        password: password,
-        deviceId: deviceId,
-        deviceName: deviceName,
-      ));
-
-      state = state.copyWith(
-        user: res.user,
-        isLoading: false,
-        isPinLocked: false,
-        pinAttemptsRemaining: 5,
-      );
-      return true;
-    } on AuthException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.message,
-        errorCode: e.errorCode,
-      );
-      return false;
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Gagal terhubung ke server',
-      );
-      return false;
-    }
-  }
-
-  Future<bool> loginWithPin(String pin) async {
-    state = state.copyWith(isLoading: true, clearError: true);
-    try {
-      final username = _prefs.savedUsername ?? 'admin';
-      final deviceId = await DeviceHelper.getDeviceId();
-
-      final res = await _repo.pinLogin(PinLoginRequest(
-        username: username,
-        pin: pin,
-        deviceId: deviceId,
-      ));
-
-      state = state.copyWith(
-        user: res.user,
-        isLoading: false,
-        isPinLocked: false,
-        pinAttemptsRemaining: 5,
-      );
-      return true;
-    } on AuthException catch (e) {
-      final isLocked = e.statusCode == 423 || e.errorCode == 'PIN_LOCKED';
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.message,
-        errorCode: e.errorCode,
-        isPinLocked: isLocked,
-        pinAttemptsRemaining: (state.pinAttemptsRemaining - 1).clamp(0, 5),
-      );
-      return false;
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Gagal verifikasi PIN',
-      );
-      return false;
-    }
-  }
-
-  Future<bool> loginWithBiometric() async {
-    try {
-      final canCheck = await _localAuth.canCheckBiometrics;
-      final isDeviceSupported = await _localAuth.isDeviceSupported();
-
-      if (!canCheck && !isDeviceSupported) {
-        state = state.copyWith(
-            errorMessage: 'Perangkat tidak mendukung sensor sidik jari');
-        return false;
-      }
-
-      final didAuthenticate = await _localAuth.authenticate(
-        localizedReason: 'Pindai sidik jari untuk masuk ke Zoom Monitor',
-        options: const AuthenticationOptions(
-          biometricOnly: false,
-          stickyAuth: true,
-        ),
-      );
-
-      if (!didAuthenticate) return false;
-
-      state = state.copyWith(isLoading: true, clearError: true);
-      final username = _prefs.savedUsername ?? 'admin';
-      final deviceId = await DeviceHelper.getDeviceId();
-      final bioToken =
-          await _secureStorage.storage.read(key: 'biometric_token');
-
-      if (bioToken == null || bioToken.isEmpty) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage:
-              'Sensor sidik jari belum didaftarkan di server. Silakan masuk via PIN terlebih dahulu.',
-        );
-        return false;
-      }
-
-      final res = await _repo.biometricLogin(BiometricLoginRequest(
-        username: username,
-        deviceId: deviceId,
-        biometricToken: bioToken,
-      ));
-
-      state = state.copyWith(
-        user: res.user,
-        isLoading: false,
-      );
-      return true;
-    } on AuthException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.message,
-        errorCode: e.errorCode,
-      );
-      return false;
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Verifikasi sidik jari gagal: $e',
-      );
-      return false;
-    }
-  }
-
-  Future<bool> setupPin({
-    required String pin,
-    required String currentPassword,
-  }) async {
-    state = state.copyWith(isLoading: true, clearError: true);
-    try {
-      await _repo.setupPin(PinSetupRequest(
-        pin: pin,
-        currentPassword: currentPassword,
-      ));
-
-      if (state.user != null) {
-        state = state.copyWith(
-          user: state.user!.copyWith(hasPin: true),
-          isLoading: false,
-        );
-      } else {
-        state = state.copyWith(isLoading: false);
-      }
-      return true;
-    } on AuthException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.message,
-        errorCode: e.errorCode,
-      );
-      return false;
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Gagal mengatur PIN baru',
-      );
-      return false;
-    }
-  }
-
-  Future<bool> toggleBiometric(bool enable) async {
-    try {
-      final deviceId = await DeviceHelper.getDeviceId();
-      if (enable) {
-        final canCheck = await _localAuth.canCheckBiometrics;
-        final isSupported = await _localAuth.isDeviceSupported();
-        if (canCheck || isSupported) {
-          final didAuth = await _localAuth.authenticate(
-            localizedReason:
-                'Pindai sensor sidik jari Anda untuk konfirmasi aktivasi',
-            options: const AuthenticationOptions(
-              biometricOnly: false,
-              stickyAuth: true,
-            ),
-          );
-          if (!didAuth) return false;
-        }
-
-        await _repo.enableBiometric(deviceId);
-        if (state.user != null) {
-          state = state.copyWith(
-              user: state.user!.copyWith(biometricEnabled: true));
-        }
-      } else {
-        await _repo.disableBiometric(deviceId);
-        if (state.user != null) {
-          state = state.copyWith(
-              user: state.user!.copyWith(biometricEnabled: false));
-        }
-      }
-      return true;
-    } catch (e) {
-      state = state.copyWith(errorMessage: 'Gagal mengatur sidik jari: $e');
-      return false;
-    }
-  }
-
-  Future<void> logout() async {
-    state = state.copyWith(isLoading: true);
+  void _clearData() {
     ApiCacheManager().clear();
-    await _repo.logout();
     _ref.invalidate(dashboardAccountsProvider);
     _ref.invalidate(accountsListProvider);
     _ref.invalidate(schedulesProvider);
@@ -335,11 +87,148 @@ class AuthController extends StateNotifier<AuthState> {
     _ref.invalidate(accountControllerProvider);
     _ref.invalidate(bookingControllerProvider);
     _ref.invalidate(schedulesControllerProvider);
+  }
+
+  void _sessionInvalidated() {
+    if (!mounted) return;
+    _clearData();
     state = AuthState(isInitialized: true);
+  }
+
+  Future<void> checkInitialAuth() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final token = await _secureStorage.getAccessToken();
+      final installationId = await DeviceHelper.getDeviceId();
+      if (token != null &&
+          await _secureStorage.getDeviceId() != installationId) {
+        await _secureStorage.clearAuth();
+        await _repo.biometrics.deleteKey();
+        await _prefs.setBiometricEnabled(false);
+        if (mounted) {
+          state = AuthState(isInitialized: true);
+        }
+        return;
+      }
+      await _prefs.setHasPin(false);
+      final hasKey = await _repo.biometrics.hasKey();
+      if (!hasKey) await _prefs.setBiometricEnabled(false);
+      if (_prefs.isBiometricEnabled && hasKey) {
+        state = AuthState(isInitialized: true);
+        return;
+      }
+      final profile = token == null ? null : await _repo.getMe();
+      if (mounted) state = AuthState(user: profile, isInitialized: true);
+    } catch (_) {
+      if (mounted) {
+        state = AuthState(
+            isInitialized: true,
+            errorMessage:
+                'Sesi belum dapat diverifikasi. Silakan login kembali.');
+      }
+    }
+  }
+
+  Future<bool> loginWithPassword(
+      {required String username, required String password}) async {
+    if (state.isLoading) return false;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final result = await _repo.login(LoginRequest(
+          username: username,
+          password: password,
+          deviceId: await DeviceHelper.getDeviceId(),
+          deviceName: await DeviceHelper.getDeviceName()));
+      _clearData();
+      state = AuthState(user: result.user, isInitialized: true);
+      return true;
+    } catch (e) {
+      if (mounted) {
+        state = state.copyWith(
+            isLoading: false,
+            errorMessage: e is AuthException
+                ? e.message
+                : 'Login gagal. Silakan coba lagi.');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> loginWithBiometric() async {
+    if (state.isLoading) return false;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final username = _prefs.savedUsername;
+      if (username == null || username.isEmpty) {
+        throw AuthException(message: 'Silakan login password terlebih dahulu');
+      }
+      final result = await _repo.biometricLogin(
+          username: username, deviceId: await DeviceHelper.getDeviceId());
+      _clearData();
+      state = AuthState(user: result.user, isInitialized: true);
+      return true;
+    } catch (e) {
+      if (mounted) {
+        state = state.copyWith(
+            isLoading: false,
+            errorMessage: e is AuthException
+                ? e.message
+                : 'Biometrik dibatalkan atau tidak tersedia. Gunakan password.');
+      }
+      return false;
+    }
+  }
+
+  Future<bool> toggleBiometric(bool enable, {String? currentPassword}) async {
+    if (state.isLoading) return false;
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final deviceId = await DeviceHelper.getDeviceId();
+      if (enable) {
+        if (currentPassword == null || currentPassword.isEmpty) {
+          throw AuthException(message: 'Konfirmasi password diperlukan');
+        }
+        await _repo.enableBiometric(deviceId, currentPassword);
+      } else {
+        await _repo.disableBiometric(deviceId);
+      }
+      state = state.copyWith(
+          isLoading: false,
+          user: state.user?.copyWith(biometricEnabled: enable));
+      return true;
+    } catch (e) {
+      if (mounted) {
+        state = state.copyWith(
+            isLoading: false,
+            errorMessage: e is AuthException
+                ? e.message
+                : 'Biometrik belum dapat diatur. Gunakan perangkat yang mendukung autentikasi aman.');
+      }
+      return false;
+    }
+  }
+
+  Future<void> logout() async {
+    state = state.copyWith(isLoading: true);
+    String? error;
+    try {
+      await _repo.logout();
+    } catch (_) {
+      error =
+          'Keluar di perangkat ini. Pencabutan sesi server belum dapat dikonfirmasi.';
+    }
+    _clearData();
+    if (mounted) state = AuthState(isInitialized: true, errorMessage: error);
   }
 
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+
+  @override
+  void dispose() {
+    _secureStorage.onSessionInvalidated = null;
+    super.dispose();
   }
 }
 

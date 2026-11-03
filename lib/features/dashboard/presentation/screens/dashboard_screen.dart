@@ -12,7 +12,8 @@ import '../../../../core/providers/core_providers.dart';
 import '../../../../core/widgets/app_glass_nav_bar.dart';
 import '../../../../core/widgets/app_nav_symbol.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
-import 'package:local_auth/local_auth.dart';
+import '../../../../core/widgets/monitoring_refresh.dart';
+
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/account_card.dart';
@@ -25,198 +26,210 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
-    final dashboardState = ref.watch(dashboardAccountsProvider);
     final user = authState.user;
     final userName =
         user?.name.isNotEmpty == true ? user!.name : 'Administrator';
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBody: true,
-      appBar: AppBar(
-        flexibleSpace: const GlassAppBarBackground(),
-        title: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                'assets/icons/zoom_monitor_app_icon.png',
+    return MonitoringRefresh(
+      refresh: () => ref.read(dashboardAccountsProvider.notifier).refresh(),
+      builder: (context) => Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBody: true,
+        appBar: AppBar(
+          flexibleSpace: const GlassAppBarBackground(),
+          title: Row(
+            children: [
+              Image.asset(
+                'assets/images/sumatera-utara.png',
                 cacheWidth: imageCacheWidth(context, 84, maxWidth: 256),
-                width: 36,
+                width: 30,
                 height: 36,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
+                excludeFromSemantics: true,
               ),
+              const SizedBox(width: 10),
+              const Flexible(
+                child: Text(
+                  'Zoom Monitor',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            GlassIconButton(
+              icon: PhosphorIconsRegular.fingerprint,
+              tooltip: 'Keamanan & biometrik',
+              onPressed: () => _showSecurityModal(context, ref),
             ),
-            const SizedBox(width: 10),
-            const Flexible(
-              child: Text(
-                'Zoom Monitor',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+            GlassIconButton(
+              icon: PhosphorIconsRegular.signOut,
+              tooltip: 'Keluar',
+              onPressed: () => _logout(context, ref),
             ),
           ],
         ),
-        actions: [
-          GlassIconButton(
-            icon: PhosphorIconsRegular.fingerprint,
-            tooltip: 'Keamanan & biometrik',
-            onPressed: () => _showSecurityModal(context, ref),
-          ),
-          GlassIconButton(
-            icon: PhosphorIconsRegular.signOut,
-            tooltip: 'Keluar',
-            onPressed: () => _logout(context, ref),
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: () => ref.read(dashboardAccountsProvider.notifier).refresh(),
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DashboardHero(
-                      userName: userName,
-                      onSearch: () => context.push(AppRoutes.search),
-                    ),
-                    if (!dashboardState.hasError) ...[
-                      const SizedBox(height: 18),
-                      RepaintBoundary(
-                        child: dashboardState.when(
-                          data: (accounts) {
-                            final total = accounts.length;
-                            final available = accounts
-                                .where((a) => a.status == 'available')
-                                .length;
-                            final busy = accounts
-                                .where((a) =>
-                                    a.status == 'meeting' ||
-                                    a.status == 'in_meeting' ||
-                                    a.status == 'busy')
-                                .length;
-                            return StatsOverviewBar(
-                              totalAccounts: total,
-                              availableAccounts: available,
-                              busyAccounts: busy,
-                            );
-                          },
-                          loading: () => _buildShimmerBar(),
-                          error: (_, __) => const SizedBox.shrink(),
-                        ),
+        body: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: () =>
+              ref.read(dashboardAccountsProvider.notifier).refresh(),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DashboardHero(
+                        userName: userName,
+                        onSearch: () => context.push(AppRoutes.search),
                       ),
+                      Consumer(builder: (context, ref, _) {
+                        final dashboardState =
+                            ref.watch(dashboardAccountsProvider);
+                        if (dashboardState.hasError) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 18),
+                          child: RepaintBoundary(
+                            child: dashboardState.when(
+                              data: (accounts) {
+                                final total = accounts.length;
+                                final available = accounts
+                                    .where((a) =>
+                                        !a.isStale && a.status == 'available')
+                                    .length;
+                                final busy = accounts
+                                    .where((a) =>
+                                        !a.isStale &&
+                                        (a.status == 'meeting' ||
+                                            a.status == 'in_meeting' ||
+                                            a.status == 'busy'))
+                                    .length;
+                                return StatsOverviewBar(
+                                  totalAccounts: total,
+                                  availableAccounts: available,
+                                  busyAccounts: busy,
+                                );
+                              },
+                              loading: () => _buildShimmerBar(),
+                              error: (_, __) => const SizedBox.shrink(),
+                            ),
+                          ),
+                        );
+                      }),
+
+                      const SizedBox(height: 26),
+
+                      // Section Title & Quick Nav
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Expanded(
+                              child: Text(
+                            'Status akun',
+                            style: TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textMain),
+                          )),
+                          TextButton(
+                            onPressed: () => context.push(AppRoutes.accounts),
+                            child: const Text('Lihat semua',
+                                style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                     ],
-
-                    const SizedBox(height: 26),
-
-                    // Section Title & Quick Nav
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Status akun',
-                          style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textMain),
-                        ),
-                        TextButton(
-                          onPressed: () => context.push(AppRoutes.accounts),
-                          child: const Text('Lihat semua',
-                              style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+                  ),
                 ),
               ),
-            ),
 
-            // List Akun Zoom (Virtualised via SliverList)
-            dashboardState.when(
-              data: (accounts) {
-                if (accounts.isEmpty) {
-                  return SliverToBoxAdapter(
+              // List Akun Zoom (Virtualised via SliverList)
+              Consumer(builder: (context, ref, _) {
+                final dashboardState = ref.watch(dashboardAccountsProvider);
+                return dashboardState.when(
+                  data: (accounts) {
+                    if (accounts.isEmpty) {
+                      return SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(18, 0, 18, 110),
+                          child: _buildEmptyState(context),
+                        ),
+                      );
+                    }
+                    return SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(18, 0, 18, 110),
+                      sliver: SliverList.separated(
+                        itemCount: accounts.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (ctx, idx) => AccountCard(
+                          account: accounts[idx],
+                          onTap: () => context.push(AppRoutes.schedules),
+                        ),
+                      ),
+                    );
+                  },
+                  loading: () => SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(18, 0, 18, 110),
-                      child: _buildEmptyState(context),
+                      child: _buildShimmerList(),
                     ),
-                  );
-                }
-                return SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 110),
-                  sliver: SliverList.separated(
-                    itemCount: accounts.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (ctx, idx) => RepaintBoundary(
-                      child: AccountCard(
-                        account: accounts[idx],
-                        onTap: () => context.push(AppRoutes.schedules),
+                  ),
+                  error: (_, __) => SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 0, 18, 110),
+                      child: ContentSurface(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            const Icon(PhosphorIconsRegular.warningCircle,
+                                size: 36, color: AppColors.statusMeeting),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Akun belum dapat dimuat',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: AppColors.textMain,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'Periksa koneksi lalu coba lagi.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () => ref
+                                  .read(dashboardAccountsProvider.notifier)
+                                  .refresh(),
+                              child: const Text('Muat ulang'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 );
-              },
-              loading: () => SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 110),
-                  child: _buildShimmerList(),
-                ),
-              ),
-              error: (_, __) => SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 18, 110),
-                  child: ContentSurface(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        const Icon(PhosphorIconsRegular.warningCircle,
-                            size: 36, color: AppColors.statusMeeting),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Akun belum dapat dimuat',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.textMain,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Periksa koneksi lalu coba lagi.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton(
-                          onPressed: () => ref
-                              .read(dashboardAccountsProvider.notifier)
-                              .refresh(),
-                          child: const Text('Muat ulang'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+              }),
+            ],
+          ),
         ),
+        bottomNavigationBar: const AppGlassNavBar(currentIndex: 0),
       ),
-      bottomNavigationBar: const AppGlassNavBar(currentIndex: 0),
     );
   }
 
@@ -299,7 +312,7 @@ class DashboardScreen extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: const BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.neoBase,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 ),
                 child: Column(
@@ -394,8 +407,8 @@ class DashboardScreen extends ConsumerWidget {
                                 const SizedBox(height: 2),
                                 Text(
                                   isBioEnabled
-                                      ? 'Aktif, buka aplikasi tanpa PIN'
-                                      : 'Nonaktif, memerlukan PIN 6 digit',
+                                      ? 'Aktif pada perangkat ini'
+                                      : 'Masuk menggunakan password',
                                   style: TextStyle(
                                       fontSize: 12,
                                       color: isBioEnabled
@@ -410,9 +423,45 @@ class DashboardScreen extends ConsumerWidget {
                             activeThumbColor: AppColors.primary,
                             activeTrackColor: AppColors.primaryLight,
                             onChanged: (val) async {
+                              String? password;
+                              if (val) {
+                                var passwordInput = '';
+                                password = await showDialog<String>(
+                                    context: context,
+                                    builder: (dialogContext) => AlertDialog(
+                                          title:
+                                              const Text('Aktifkan biometrik'),
+                                          content: TextField(
+                                              onChanged: (value) =>
+                                                  passwordInput = value,
+                                              obscureText: true,
+                                              autocorrect: false,
+                                              enableSuggestions: false,
+                                              decoration: const InputDecoration(
+                                                  labelText:
+                                                      'Konfirmasi password akun')),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    dialogContext),
+                                                child: const Text('Batal')),
+                                            TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    dialogContext,
+                                                    passwordInput),
+                                                child: const Text(
+                                                    'Daftarkan perangkat'))
+                                          ],
+                                        ));
+
+                                if (password == null || password.isEmpty) {
+                                  return;
+                                }
+                              }
                               final ok = await ref
                                   .read(authStateProvider.notifier)
-                                  .toggleBiometric(val);
+                                  .toggleBiometric(val,
+                                      currentPassword: password);
                               if (ctx.mounted) {
                                 if (ok) {
                                   UiFeedback.showSuccess(
@@ -437,74 +486,6 @@ class DashboardScreen extends ConsumerWidget {
 
                     const SizedBox(height: 14),
 
-                    // Tombol Uji Sensor Sidik Jari
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        side: const BorderSide(color: AppColors.primary),
-                      ),
-                      icon: const Icon(PhosphorIconsBold.fingerprint,
-                          color: AppColors.primary, size: 20),
-                      label: const Text(
-                        'Uji Sensor Sidik Jari Sekarang',
-                        style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13),
-                      ),
-                      onPressed: () async {
-                        try {
-                          final localAuth = LocalAuthentication();
-                          final didAuth = await localAuth.authenticate(
-                            localizedReason:
-                                'Pindai sensor sidik jari Anda untuk uji fungsi',
-                            options: const AuthenticationOptions(
-                                biometricOnly: false, stickyAuth: true),
-                          );
-                          if (context.mounted) {
-                            if (didAuth) {
-                              UiFeedback.showSuccess(context,
-                                  'Sensor sidik jari berfungsi normal!');
-                            } else {
-                              UiFeedback.showError(context,
-                                  'Verifikasi sidik jari dibatalkan/gagal');
-                            }
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            UiFeedback.showError(
-                                context, 'Sensor tidak dapat dipindai: $e');
-                          }
-                        }
-                      },
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // Tombol Ubah PIN
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                      icon: const Icon(PhosphorIconsBold.key,
-                          color: Colors.white, size: 18),
-                      label: const Text(
-                        'Ganti PIN 6-Digit',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13),
-                      ),
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                        context.push(AppRoutes.pinSetup);
-                      },
-                    ),
                     const SizedBox(height: 8),
                   ],
                 ),

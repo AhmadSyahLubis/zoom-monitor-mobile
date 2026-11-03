@@ -44,7 +44,8 @@ void main() {
 
       expect(invite.contains('UNDANGAN RAPAT VIRTUAL'), isTrue);
       expect(invite.contains('Rapat Koordinasi Wilayah'), isTrue);
-      expect(invite.contains('Host Key: 654321'), isTrue);
+      expect(invite.contains('Host Key'), isFalse);
+      expect(invite.contains('654321'), isFalse);
       expect(invite.contains('https://zoom.us/j/89012345678'), isTrue);
     });
   });
@@ -155,7 +156,7 @@ void main() {
       expect(json['account_id'], 1);
       expect(json['is_recurring'], isTrue);
       expect(json['recurrence_type'], 2);
-      expect(json['recurring_type'], 2);
+      expect(json.containsKey('recurring_type'), isFalse);
       expect(json['end_date_time'], '2026-10-28T23:59:59Z');
     });
 
@@ -177,6 +178,7 @@ void main() {
       expect(json['duration'], 90);
       expect(json['is_recurring'], isTrue);
       expect(json['recurrence_type'], 1);
+      expect(json.containsKey('recurring_type'), isFalse);
       expect(json['end_date_time'], '2026-10-30T23:59:59Z');
     });
   });

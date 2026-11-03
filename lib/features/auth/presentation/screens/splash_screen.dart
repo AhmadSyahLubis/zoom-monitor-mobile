@@ -3,7 +3,7 @@ import '../../../../core/utils/image_decode_size.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/app_routes.dart';
-import '../../../../core/providers/core_providers.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../controllers/auth_controller.dart';
 
@@ -26,33 +26,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _determineInitialRoute() async {
     await Future.delayed(const Duration(milliseconds: 600));
     if (!mounted) return;
-
-    final secureStorage = ref.read(secureStorageServiceProvider);
-    final prefs = ref.read(preferencesServiceProvider);
-
-    final token = await secureStorage.getAccessToken();
-    if (token == null || token.isEmpty) {
-      if (mounted) context.go(AppRoutes.login);
-      return;
-    }
-
-    if (prefs.isBiometricEnabled || prefs.hasPin) {
-      if (mounted) context.go(AppRoutes.pinLogin);
-      return;
-    }
-
-    // Cek profil jika tidak ada PIN & biometrik
-    final profile = await ref.read(authRepositoryProvider).getMe();
-    if (!mounted) return;
-
-    if (profile != null) {
-      if (!profile.hasPin) {
-        context.go(AppRoutes.pinSetup);
-      } else {
-        context.go(AppRoutes.dashboard);
-      }
-    } else {
-      context.go(AppRoutes.login);
+    final auth = ref.read(authStateProvider);
+    if (auth.isInitialized) {
+      context.go(auth.isAuthenticated ? AppRoutes.dashboard : AppRoutes.login);
     }
   }
 

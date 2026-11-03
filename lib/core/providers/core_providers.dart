@@ -9,14 +9,16 @@ import '../storage/secure_storage_service.dart';
 
 /// Provider instance SharedPreferences (di-override di main.dart)
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('sharedPreferencesProvider must be overridden in main()');
+  throw UnimplementedError(
+      'sharedPreferencesProvider must be overridden in main()');
 });
 
 /// Provider FlutterSecureStorage
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
   return const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
-    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+    iOptions:
+        IOSOptions(accessibility: KeychainAccessibility.unlocked_this_device),
   );
 });
 

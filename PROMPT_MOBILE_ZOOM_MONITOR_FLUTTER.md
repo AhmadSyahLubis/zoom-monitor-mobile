@@ -37,16 +37,14 @@ Fokus pada desain layar yang benar-benar ada di proyek. Pertahankan lima destina
 
 Struktur kode memakai modul `lib/features/auth`, `dashboard`, `booking`, `recording`, dan `account`. Tiap modul mempunyai lapisan `data` serta `presentation`; UI memakai repository dan controller yang sudah ada. Komponen bersama ada di `lib/core/theme` dan `lib/core/widgets`. Jangan minta Stitch merombak struktur ini.
 
-API memakai base path `/api/v1`. Nilai bawaan di `lib/core/config/app_config.dart` saat ini adalah `http://10.70.0.153:8080/api/v1`, dapat diganti lewat `API_BASE_URL` atau pengaturan server pada layar login. Alamat itu hanya konfigurasi jaringan lokal saat ini, **bukan URL produksi dan bukan bagian dari desain**. Jangan menaruhnya pada mockup utama.
+API memakai base path `/api/v1` pada `https://zoom-api.sumutcerdas.web.id/api/v1`. URL rilis tetap; build debug dapat memakai `API_BASE_URL` untuk pengembangan lokal. Pengguna tidak memilih server pada layar login.
 
 ### Rute dan peta layar
 
 | Rute | Layar dan fungsi yang sudah ada |
 |---|---|
 | `/` | Splash, memeriksa sesi tersimpan |
-| `/login` | Username, password, opsi konfigurasi URL API lokal |
-| `/pin-login` | Login PIN enam digit, opsi biometrik, penanganan PIN terkunci |
-| `/pin-setup` | Buat atau ganti PIN dengan konfirmasi password |
+| `/login` | Username, password, dan login biometrik jika perangkat sudah terdaftar |
 | `/dashboard` | Beranda, ringkasan akun, daftar status, pintasan cari waktu |
 | `/search` | Pilih tanggal, jam WIB, durasi; lihat akun tersedia atau bentrok; buka form booking |
 | `/schedules` | Tab `Live Rapat`, `Mendatang`, `Riwayat` dan tindakan per rapat |
@@ -54,7 +52,7 @@ API memakai base path `/api/v1`. Nilai bawaan di `lib/core/config/app_config.dar
 | `/accounts` | Daftar akun Zoom, status aktif, uji koneksi, tambah, edit, hapus |
 | `/accounts/form` | Form tambah atau edit akun Zoom S2S OAuth |
 
-Lima rute dari `/dashboard` sampai `/accounts` muncul di bottom navigation. Splash, login, PIN, dan form akun bukan tab baru. Top bar Beranda menampilkan ikon **Keamanan & biometrik** dan **Keluar** secara langsung, masing-masing dengan tooltip dan aksi yang sudah ada.
+Lima rute dari `/dashboard` sampai `/accounts` muncul di bottom navigation. Splash, login, dan form akun bukan tab baru. Top bar Beranda menampilkan ikon **Keamanan & biometrik** dan **Keluar** secara langsung, masing-masing dengan tooltip dan aksi yang sudah ada.
 
 ### Data yang menentukan isi layar
 
@@ -73,8 +71,8 @@ Status dashboard yang sekarang dikenali: `available`, `meeting`/`in_meeting`/`bu
 
 ## Alur yang perlu divisualkan
 
-1. **Masuk**: username dan password, validasi, loading, error, lalu PIN setup jika akun belum mempunyai PIN. Pengaturan URL API lokal adalah aksi sekunder.
-2. **Buka kembali aplikasi**: layar PIN enam digit dengan biometrik jika tersedia. Sediakan jalan kembali ke login password saat PIN terkunci atau biometrik gagal.
+1. **Masuk**: username dan password dengan validasi, loading, dan error. Setelah perangkat didaftarkan, halaman login menampilkan aksi biometrik.
+2. **Buka kembali aplikasi**: pengguna dapat memakai biometrik dengan tantangan server untuk membuat sesi baru, atau kembali ke login password jika biometrik gagal.
 3. **Pantau akun**: pada Beranda, lihat ringkasan berdasarkan data API dan daftar akun. Setiap akun menunjukkan nama, status, topik aktif bila ada, kapasitas atau paket bila tersedia, serta waktu pembaruan. Tarik untuk menyegarkan.
 4. **Cari dan booking**: pilih tanggal, jam mulai WIB, dan durasi; tekan **Cek ketersediaan**; pisahkan akun tersedia dari akun bentrok atau error. Hanya akun yang tersedia menawarkan aksi booking. Bottom sheet booking menampilkan akun dan slot terpilih, input topik, opsi rapat berulang, serta hasil sukses.
 5. **Kelola jadwal**: tab live, mendatang, riwayat. Aksi yang mungkin mencakup gabung Zoom, salin undangan, edit, batalkan, dan akhiri rapat live. Aksi destruktif memerlukan konfirmasi yang menjelaskan dampaknya.
@@ -90,12 +88,12 @@ Ikuti `DESIGN.md` di repo sebagai sumber identitas. Rangkuman untuk Stitch:
 - **Tipografi**: Inter untuk seluruh UI, dengan hierarki berat dan ukuran yang jelas untuk judul, angka, label, dan metadata. Font dibundel secara lokal.
 - **Ikon**: lima ikon navigasi digambar khusus dengan stroke dan ujung konsisten, lengkap dengan label. Ikon aksi lain boleh memakai Phosphor dengan berat seragam. Hindari ikon sparkle dan kamera Zoom sebagai identitas produk.
 - **Motif merek**: monogram **M** abstrak yang mewakili Monitor, berwarna putih kebiruan di atas navy, dengan aperture kecil di simpul tengah sebagai aksen lensa kamera. Sumber vektor ada di `tool/design_assets/zoom_monitor_mark.svg`; jangan kembali ke simbol dua jendela hijau.
-- **Glass**: gunakan efek frosted hanya untuk bottom navigation yang mengambang dan, bila beralasan, satu kontrol navigasi lain. Kartu data, form, tab isi, dan dialog utama tetap solid. Blur harus mempertahankan kontras teks serta tidak menutup konten.
+- **Permukaan**: ikuti arah neumorphism web dengan dasar `#EAF0F7`, bayangan terang-gelap yang pendek pada kartu utama, dan cekungan pada tab atau kontrol terpilih. Kartu data, form, dan dialog tetap opak. Glass tetap terbatas pada navbar iOS; navbar Android memakai permukaan opak untuk menjaga kelancaran scroll.
 - **Permukaan**: latar biru abu muda, kartu putih untuk data, border tipis, bayangan hanya bila menandai lapisan yang mengambang. Hindari semua elemen berbentuk pil.
 - **Foto**: Beranda dan Login memakai foto ruang rapat. Cari, Jadwal, Rekaman, dan Akun masing-masing memakai banner foto ringkas yang sesuai tugas halaman. Semua aset ada di `assets/images` dan prompt pembuatannya tercatat di `ASSET_SOURCES.md`. Data dan aksi tetap dominan.
 - **Gerak**: transisi singkat yang menjelaskan pergantian keadaan. Tidak ada shimmer permanen, bounce berlebihan, atau animasi dekoratif tanpa fungsi.
 
-Aset aktif: `assets/images/meeting_console_hero.png`, `assets/images/hybrid_desk_login.png`, `assets/images/search_availability.png`, `assets/images/schedule_room.png`, `assets/images/recordings_console.png`, `assets/images/accounts_workstation.png`, serta ikon di `assets/icons`. Jangan menyalin identitas atau logo Zoom. Ikon aplikasi dikonfigurasi untuk Android, iOS, dan web lewat `flutter_launcher_icons.yaml`.
+Aset aktif mengikuti FE web `C:\Project\FE-ZoomMonitor`: `assets/images/meeting_console_hero.webp`, `assets/images/search_availability.webp`, `assets/images/schedule_room.webp`, `assets/images/recordings_console.webp`, `assets/images/accounts_workstation.webp`, lambang Sumatera Utara dan logo Kolaborasi Sumut Berkah di `assets/images`, serta ikon di `assets/icons`. Login memakai identitas brand tanpa foto hero. API bawaan: `https://zoom-api.sumutcerdas.web.id/api/v1`; debug dapat memakai backend lokal. Ikon aplikasi dikonfigurasi untuk Android, iOS, dan web lewat `flutter_launcher_icons.yaml`.
 
 ### Rujukan desain yang dipakai sebagai prinsip
 

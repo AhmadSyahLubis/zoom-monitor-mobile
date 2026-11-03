@@ -2,21 +2,15 @@ class ZoomAccount {
   final int id;
   final String accountName;
   final String? email;
-  final String zoomAccountId;
-  final String clientId;
-  final String? clientSecret;
   final String? hostKey;
-  final bool isActive;
+  final bool hasToken;
 
   ZoomAccount({
     required this.id,
     required this.accountName,
     this.email,
-    required this.zoomAccountId,
-    required this.clientId,
-    this.clientSecret,
     this.hostKey,
-    this.isActive = true,
+    required this.hasToken,
   });
 
   factory ZoomAccount.fromJson(Map<String, dynamic> json) {
@@ -24,27 +18,9 @@ class ZoomAccount {
       id: json['id'] as int? ?? 0,
       accountName: json['account_name'] as String? ?? 'Akun Zoom',
       email: json['email'] as String?,
-      zoomAccountId: json['zoom_account_id'] as String? ?? '',
-      clientId: json['client_id'] as String? ?? '',
-      clientSecret: json['client_secret'] as String?,
       hostKey: json['host_key'] as String?,
-      isActive: json['is_active'] as bool? ?? true,
+      hasToken: json['has_token'] as bool? ?? false,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{
-      'account_name': accountName,
-      'email': email,
-      'zoom_account_id': zoomAccountId,
-      'client_id': clientId,
-      'host_key': hostKey,
-      'is_active': isActive,
-    };
-    if (clientSecret != null && clientSecret!.isNotEmpty) {
-      map['client_secret'] = clientSecret;
-    }
-    return map;
   }
 }
 
@@ -92,12 +68,16 @@ class CheckConnectionResponse {
 
     return CheckConnectionResponse(
       isConnected: connected,
-      accountName: json['account_name'] as String? ?? json['name'] as String? ?? '',
+      accountName:
+          json['account_name'] as String? ?? json['name'] as String? ?? '',
       userCount: userCountVal,
-      planType: json['plan_type'] as String? ?? json['type'] as String? ?? 'Licensed',
+      planType:
+          json['plan_type'] as String? ?? json['type'] as String? ?? 'Licensed',
       message: msg.isNotEmpty
           ? msg
-          : (connected ? 'Koneksi ke Zoom berhasil diverifikasi' : 'Gagal terhubung ke Zoom'),
+          : (connected
+              ? 'Koneksi ke Zoom berhasil diverifikasi'
+              : 'Gagal terhubung ke Zoom'),
     );
   }
 }

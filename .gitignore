@@ -49,3 +49,12 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Local configuration and release signing material
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+key.properties
+config/app.production.json

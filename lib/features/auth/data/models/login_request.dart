@@ -21,59 +21,25 @@ class LoginRequest {
   }
 }
 
-class PinSetupRequest {
-  final String pin;
-  final String currentPassword;
-
-  PinSetupRequest({
-    required this.pin,
-    required this.currentPassword,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'pin': pin,
-      'current_password': currentPassword,
-    };
-  }
-}
-
-class PinLoginRequest {
-  final String username;
-  final String pin;
-  final String deviceId;
-
-  PinLoginRequest({
-    required this.username,
-    required this.pin,
-    required this.deviceId,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'username': username,
-      'pin': pin,
-      'device_id': deviceId,
-    };
-  }
-}
-
 class BiometricLoginRequest {
   final String username;
   final String deviceId;
-  final String biometricToken;
+  final String challengeId;
+  final String signature;
 
   BiometricLoginRequest({
     required this.username,
     required this.deviceId,
-    required this.biometricToken,
+    required this.challengeId,
+    required this.signature,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'username': username,
       'device_id': deviceId,
-      'biometric_token': biometricToken,
+      'challenge_id': challengeId,
+      'signature': signature,
     };
   }
 }

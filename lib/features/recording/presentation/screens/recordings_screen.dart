@@ -186,7 +186,7 @@ class _RecordingsScreenState extends ConsumerState<RecordingsScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
                       children: const [
                         SectionPhotoBanner(
-                          asset: 'assets/images/recordings_console.png',
+                          asset: 'assets/images/recordings_console.webp',
                           title: 'Pustaka rekaman',
                           subtitle: 'Cari ulang rapat yang sudah direkam.',
                         ),
@@ -209,7 +209,7 @@ class _RecordingsScreenState extends ConsumerState<RecordingsScreen> {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16),
                           child: SectionPhotoBanner(
-                            asset: 'assets/images/recordings_console.png',
+                            asset: 'assets/images/recordings_console.webp',
                             title: 'Pustaka rekaman',
                             subtitle: '${recordings.length} rekaman tersedia',
                           ),
@@ -219,9 +219,7 @@ class _RecordingsScreenState extends ConsumerState<RecordingsScreen> {
                       final recording = recordings[idx - 1];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: RepaintBoundary(
-                          child: RecordingCard(recording: recording),
-                        ),
+                        child: RecordingCard(recording: recording),
                       );
                     },
                   );

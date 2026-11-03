@@ -12,7 +12,9 @@ class AppColors {
   static const Color statusError = Color(0xFF5A6778);
 
   static const Color scaffoldLight = Color(0xFFF2F5F9);
-  static const Color surfaceCard = Color(0xFFFFFFFF);
+  static const Color neoBase = Color(0xFFEAF0F7);
+  static const Color neoEdge = Color(0xFF71859E);
+  static const Color surfaceCard = neoBase;
   static const Color textMain = Color(0xFF14273E);
   static const Color textMuted = Color(0xFF536579);
   static const Color borderLight = Color(0xFFD8E2EB);
