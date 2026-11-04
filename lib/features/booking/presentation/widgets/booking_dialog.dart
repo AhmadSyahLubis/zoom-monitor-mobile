@@ -166,6 +166,7 @@ class _BookingDialogState extends ConsumerState<BookingDialog> {
         builder: (ctx) => BookingSuccessDialog(
           meeting: res,
           accountName: widget.accountResult.account.name,
+          requestedStart: DateTime.tryParse(req.startTime),
         ),
       );
     } else {

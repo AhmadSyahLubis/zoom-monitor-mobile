@@ -7,8 +7,8 @@ import 'package:zoom_monitor_mobile/features/booking/data/models/booking_request
 
 void main() {
   test('default API uses the HTTPS Zoom Monitor endpoint', () {
-    expect(
-        AppConfig.defaultBaseUrl, 'https://zoom-api.sumutcerdas.web.id/api/v1');
+    expect(AppConfig.defaultBaseUrl,
+        'https://zoom-api.sumutcerdas.web.id/api/v1');
     expect(AppConfig.baseUrl, AppConfig.defaultBaseUrl);
   });
 

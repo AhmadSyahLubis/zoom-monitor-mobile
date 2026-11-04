@@ -17,6 +17,7 @@ import '../../../../core/widgets/monitoring_refresh.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/account_card.dart';
+import '../widgets/account_detail_sheet.dart';
 import '../widgets/dashboard_hero.dart';
 import '../widgets/stats_overview_bar.dart';
 
@@ -110,10 +111,18 @@ class DashboardScreen extends ConsumerWidget {
                                             a.status == 'in_meeting' ||
                                             a.status == 'busy'))
                                     .length;
+                                final scheduled = accounts
+                                    .where((a) =>
+                                        !a.isStale && a.status == 'scheduled')
+                                    .length;
+                                final errors =
+                                    total - available - busy - scheduled;
                                 return StatsOverviewBar(
                                   totalAccounts: total,
                                   availableAccounts: available,
                                   busyAccounts: busy,
+                                  scheduledAccounts: scheduled,
+                                  errorAccounts: errors,
                                 );
                               },
                               loading: () => _buildShimmerBar(),
@@ -172,7 +181,18 @@ class DashboardScreen extends ConsumerWidget {
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (ctx, idx) => AccountCard(
                           account: accounts[idx],
-                          onTap: () => context.push(AppRoutes.schedules),
+                          onTap: () => showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (sheetContext) => AccountDetailSheet(
+                              account: accounts[idx],
+                              onViewSchedule: () {
+                                Navigator.of(sheetContext).pop();
+                                context.push(AppRoutes.schedules);
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     );

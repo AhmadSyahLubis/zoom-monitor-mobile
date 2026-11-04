@@ -8,12 +8,16 @@ class StatsOverviewBar extends StatelessWidget {
   final int totalAccounts;
   final int availableAccounts;
   final int busyAccounts;
+  final int scheduledAccounts;
+  final int errorAccounts;
 
   const StatsOverviewBar({
     super.key,
     required this.totalAccounts,
     required this.availableAccounts,
     required this.busyAccounts,
+    this.scheduledAccounts = 0,
+    this.errorAccounts = 0,
   });
 
   @override
@@ -56,10 +60,15 @@ class StatsOverviewBar extends StatelessWidget {
                       flex: busyAccounts,
                       child: const ColoredBox(color: AppColors.statusMeeting),
                     ),
-                  if (totalAccounts - availableAccounts - busyAccounts > 0)
+                  if (scheduledAccounts > 0)
                     Expanded(
-                      flex: totalAccounts - availableAccounts - busyAccounts,
-                      child: const ColoredBox(color: AppColors.borderLight),
+                      flex: scheduledAccounts,
+                      child: const ColoredBox(color: AppColors.statusScheduled),
+                    ),
+                  if (errorAccounts > 0)
+                    Expanded(
+                      flex: errorAccounts,
+                      child: const ColoredBox(color: AppColors.statusError),
                     ),
                   if (totalAccounts == 0)
                     const Expanded(
@@ -87,6 +96,28 @@ class StatsOverviewBar extends StatelessWidget {
                   label: 'Sedang rapat',
                   kind: AppNavSymbolKind.busy,
                   color: AppColors.statusMeeting,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          Row(
+            children: [
+              Expanded(
+                child: _Metric(
+                  value: scheduledAccounts,
+                  label: 'Terjadwal',
+                  kind: AppNavSymbolKind.calendar,
+                  color: AppColors.statusScheduled,
+                ),
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: _Metric(
+                  value: errorAccounts,
+                  label: 'Perlu diperiksa',
+                  kind: AppNavSymbolKind.secure,
+                  color: AppColors.statusError,
                 ),
               ),
             ],

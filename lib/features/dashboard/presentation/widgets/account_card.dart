@@ -17,6 +17,7 @@ class AccountCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   Color get _statusColor {
+    if (account.isStale) return AppColors.statusError;
     switch (account.status) {
       case 'available':
         return AppColors.statusAvailable;
@@ -142,9 +143,13 @@ class AccountCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'TOPIK RAPAT',
-                          style: TextStyle(
+                        Text(
+                          account.status == 'scheduled'
+                              ? 'AGENDA BERIKUTNYA'
+                              : account.status == 'meeting'
+                                  ? 'RAPAT BERLANGSUNG'
+                                  : 'AKTIVITAS AKUN',
+                          style: const TextStyle(
                             color: AppColors.textMuted,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -192,7 +197,7 @@ class AccountCard extends StatelessWidget {
                   const Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      'Lihat jadwal',
+                      'Lihat detail akun',
                       style: TextStyle(
                         color: AppColors.primary,
                         fontSize: 11,

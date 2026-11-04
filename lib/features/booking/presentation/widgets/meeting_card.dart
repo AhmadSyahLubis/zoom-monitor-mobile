@@ -10,6 +10,7 @@ import '../../../../core/utils/invite_formatter.dart';
 import '../../../../core/utils/ui_feedback.dart';
 import '../../../../core/widgets/monitoring_labels.dart';
 import '../../data/models/schedule_item.dart';
+import 'invitation_pdf_button.dart';
 
 enum MeetingCardType { live, upcoming, past }
 
@@ -307,6 +308,12 @@ class MeetingCard extends StatelessWidget {
                   ),
                 ],
               ],
+            ),
+            const SizedBox(height: 10),
+            InvitationPdfButton(
+              accountId: meeting.accountId,
+              meetingId: meeting.meetingId,
+              occurrenceId: meeting.occurrenceId,
             ),
           ],
         ),

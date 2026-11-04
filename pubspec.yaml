@@ -36,6 +36,8 @@ dependencies:
   # Actions, Clipboard & External Launchers
   url_launcher: ^6.3.0
   share_plus: ^9.0.0
+  pdf: ^3.13.1
+  path_provider: ^2.1.6
   phosphor_icons: 3.0.1
 dev_dependencies:
   flutter_test:
@@ -52,3 +54,5 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/fonts/InterInvitation-Regular.ttf
+    - assets/fonts/InterInvitation-Bold.ttf

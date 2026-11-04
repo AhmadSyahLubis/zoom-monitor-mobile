@@ -33,6 +33,7 @@ class AppGlassNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final enlargedText = MediaQuery.textScalerOf(context).scale(1) > 1.4;
     final navContent = Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
       decoration: BoxDecoration(
@@ -68,7 +69,7 @@ class AppGlassNavBar extends StatelessWidget {
         top: false,
         minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
         child: Container(
-          height: 68,
+          height: enlargedText ? 76 : 68,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             boxShadow: NeoDepth.raised,
@@ -104,6 +105,7 @@ class _NavDestination extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = selected ? AppColors.primaryDark : AppColors.textMuted;
+    final enlargedText = MediaQuery.textScalerOf(context).scale(1) > 1.4;
     final content = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -133,9 +135,10 @@ class _NavDestination extends StatelessWidget {
           child: selected
               ? NeoInsetSurface(
                   radius: 18,
-                  child: SizedBox(height: 52, child: content),
+                  child:
+                      SizedBox(height: enlargedText ? 60 : 52, child: content),
                 )
-              : SizedBox(height: 56, child: content),
+              : SizedBox(height: enlargedText ? 64 : 56, child: content),
         ),
       ),
     );

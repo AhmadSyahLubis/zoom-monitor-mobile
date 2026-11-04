@@ -100,6 +100,35 @@ class BookingRepository {
     }
   }
 
+  Future<Map<String, dynamic>> getMeetingDetail(
+      int accountId, int meetingId) async {
+    try {
+      final response =
+          await _dio.get(ApiEndpoints.meetingDetails(accountId, meetingId));
+      final apiRes = ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data as Map<String, dynamic>,
+        (data) => data as Map<String, dynamic>,
+      );
+      if (apiRes.success && apiRes.data != null) return apiRes.data!;
+      throw const BookingFailure(
+          'Detail rapat tidak tersedia dari Zoom.', null);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 404) {
+        throw const BookingFailure(
+            'Detail rapat tidak tersedia dari Zoom. Muat ulang jadwal rapat.',
+            null);
+      }
+      if (status == 401 || status == 403) {
+        throw const BookingFailure(
+            'Akses detail rapat tidak diizinkan. Masuk kembali lalu coba lagi.',
+            null);
+      }
+      throw const BookingFailure(
+          'Detail rapat gagal dimuat. Periksa koneksi lalu coba lagi.', null);
+    }
+  }
+
   Future<SchedulesData> listSchedules({bool forceRefresh = false}) async {
     return _cacheManager.getOrFetch<SchedulesData>(
       key: 'bookings:schedules',

@@ -34,9 +34,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void initState() {
     super.initState();
     final now = DateTime.now().toUtc().add(const Duration(hours: 7));
-    _selectedDate = DateTime(now.year, now.month, now.day);
-    // Jam sekarang + 10 menit
     final nextTime = now.add(const Duration(minutes: 10));
+    _selectedDate = DateTime(nextTime.year, nextTime.month, nextTime.day);
     _selectedTime = TimeOfDay(hour: nextTime.hour, minute: nextTime.minute);
   }
 
@@ -44,29 +43,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String get _formattedTime =>
       '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}';
 
-  void _setQuickDate(int daysFromToday) {
-    final nowWib = DateTime.now().toUtc().add(const Duration(hours: 7));
-    setState(() {
-      _selectedDate = DateTime(nowWib.year, nowWib.month, nowWib.day)
-          .add(Duration(days: daysFromToday));
-    });
-  }
-
-  bool _isQuickDate(int daysFromToday) {
-    final nowWib = DateTime.now().toUtc().add(const Duration(hours: 7));
-    final date = DateTime(nowWib.year, nowWib.month, nowWib.day)
-        .add(Duration(days: daysFromToday));
-    return _selectedDate.year == date.year &&
-        _selectedDate.month == date.month &&
-        _selectedDate.day == date.day;
-  }
-
   Future<void> _pickDate() async {
+    final nowWib = DateTime.now().toUtc().add(const Duration(hours: 7));
+    final todayWib = DateTime(nowWib.year, nowWib.month, nowWib.day);
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 1)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      firstDate: todayWib,
+      lastDate: todayWib.add(const Duration(days: 365)),
     );
     if (picked != null) {
       setState(() {
@@ -149,34 +133,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  const Text(
-                    'Tanggal rapat',
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      ChoiceChip(
-                        label: const Text('Hari ini'),
-                        selected: _isQuickDate(0),
-                        onSelected: (_) => _setQuickDate(0),
-                      ),
-                      ChoiceChip(
-                        label: const Text('Besok'),
-                        selected: _isQuickDate(1),
-                        onSelected: (_) => _setQuickDate(1),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Row Tanggal & Jam
                   Row(
                     children: [
                       Expanded(
@@ -201,13 +157,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text('Tanggal',
+                                      const Text('Tanggal rapat',
                                           style: TextStyle(
                                               fontSize: 11,
                                               color: AppColors.textMuted)),
                                       Text(
-                                        DateTimeUtil.formatDateOnlyWib(
-                                            _selectedDate.toIso8601String()),
+                                        DateTimeUtil.dateWibFormat
+                                            .format(_selectedDate),
                                         style: const TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.bold),
@@ -243,7 +199,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text('Mulai (WIB)',
+                                      const Text('Jam mulai',
                                           style: TextStyle(
                                               fontSize: 11,
                                               color: AppColors.textMuted)),
@@ -264,37 +220,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ],
                   ),
                   const SizedBox(height: 14),
-
-                  const Text(
-                    'Durasi cepat',
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      for (final minutes in [30, 45, 60, 120])
-                        ChoiceChip(
-                          label: Text('$minutes mnt'),
-                          selected: _selectedDuration == minutes,
-                          onSelected: (_) =>
-                              setState(() => _selectedDuration = minutes),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Dropdown Durasi
                   DropdownButtonFormField<int>(
                     isExpanded: true,
                     initialValue: _selectedDuration,
                     decoration: const InputDecoration(
-                      labelText: 'Durasi Rapat',
+                      labelText: 'Durasi rapat',
                       prefixIcon: Icon(PhosphorIconsRegular.timer,
                           color: AppColors.textMuted),
                     ),

@@ -38,7 +38,7 @@ class StatusBadge extends StatelessWidget {
       default:
         textColor = AppColors.statusError;
         bgColor = AppColors.statusErrorBg;
-        label = 'Belum terverifikasi';
+        label = 'Perlu diperiksa';
         icon = PhosphorIconsRegular.warningCircle;
     }
 
