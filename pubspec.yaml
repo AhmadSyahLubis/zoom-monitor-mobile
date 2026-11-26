@@ -35,10 +35,12 @@ dependencies:
 
   # Actions, Clipboard & External Launchers
   url_launcher: ^6.3.0
-  share_plus: ^9.0.0
+  share_plus: 10.0.1
   pdf: ^3.13.1
   path_provider: ^2.1.6
   phosphor_icons: 3.0.1
+  file_picker: 10.3.10
+  uuid: ^4.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
