@@ -1,4 +1,26 @@
 class ApiEndpoints {
+  static const String opds = '/opds';
+  static const String opdAccounts = '/opd-accounts';
+  static const String adminHealth = '/admin/health';
+  static String opdAccount(int id) => '/opd-accounts/$id';
+  static const String requestLetters = '/meeting-request-letters';
+  static const String meetingRequests = '/meeting-requests';
+  static const String meetingHistory = '/meeting-requests/history';
+  static String meetingRequest(String id) => '/meeting-requests/$id';
+  static String requestOptions(String id) => '/meeting-requests/$id/options';
+  static String requestApprove(String id) => '/meeting-requests/$id/approve';
+  static String requestReject(String id) => '/meeting-requests/$id/reject';
+  static String requestReconcile(String id) =>
+      '/meeting-requests/$id/reconcile';
+  static String requestInvitation(String id) =>
+      '/meeting-requests/$id/invitation';
+  static String requestHostAccess(String id) =>
+      '/meeting-requests/$id/host-access';
+  static String requestRecording(String id) =>
+      '/meeting-requests/$id/recording';
+  static String requestLetter(String id) => '/meeting-requests/$id/letter';
+  static String requestLetterContent(String id) =>
+      '/meeting-requests/$id/letter/content';
   // Health
   static const String health = '/health';
 
