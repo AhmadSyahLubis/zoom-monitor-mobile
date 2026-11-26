@@ -9,4 +9,9 @@ class AppRoutes {
   static const String recordings = '/recordings';
   static const String accounts = '/accounts';
   static const String accountForm = '/accounts/form';
+  static const String requests = '/requests';
+  static const String requestForm = '/requests/new';
+  static const String history = '/history';
+  static const String opdAccounts = '/opd-accounts';
+  static const String systemHealth = '/system-health';
 }

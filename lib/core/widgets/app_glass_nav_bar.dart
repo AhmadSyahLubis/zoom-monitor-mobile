@@ -7,17 +7,20 @@ import '../theme/glass_surface.dart';
 import 'app_nav_symbol.dart';
 
 class AppGlassNavBar extends StatelessWidget {
-  const AppGlassNavBar({super.key, required this.currentIndex});
+  const AppGlassNavBar(
+      {super.key, required this.currentIndex, this.isAdmin = true});
 
   final int currentIndex;
+  final bool isAdmin;
 
-  static const _items = <({AppNavSymbolKind icon, String label, String route})>[
+  static const _adminItems =
+      <({AppNavSymbolKind icon, String label, String route})>[
     (
       icon: AppNavSymbolKind.dashboard,
       label: 'Beranda',
       route: AppRoutes.dashboard
     ),
-    (icon: AppNavSymbolKind.search, label: 'Cari', route: AppRoutes.search),
+    (icon: AppNavSymbolKind.search, label: 'Ajukan', route: AppRoutes.requests),
     (
       icon: AppNavSymbolKind.calendar,
       label: 'Jadwal',
@@ -30,9 +33,28 @@ class AppGlassNavBar extends StatelessWidget {
     ),
     (icon: AppNavSymbolKind.accounts, label: 'Akun', route: AppRoutes.accounts),
   ];
+  static const _opdItems =
+      <({AppNavSymbolKind icon, String label, String route})>[
+    (
+      icon: AppNavSymbolKind.dashboard,
+      label: 'Beranda',
+      route: AppRoutes.dashboard
+    ),
+    (
+      icon: AppNavSymbolKind.search,
+      label: 'Pengajuan',
+      route: AppRoutes.requests
+    ),
+    (
+      icon: AppNavSymbolKind.calendar,
+      label: 'Riwayat',
+      route: AppRoutes.history
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final items = isAdmin ? _adminItems : _opdItems;
     final enlargedText = MediaQuery.textScalerOf(context).scale(1) > 1.4;
     final navContent = Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
@@ -48,15 +70,15 @@ class AppGlassNavBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          for (var index = 0; index < _items.length; index++)
+          for (var index = 0; index < items.length; index++)
             Expanded(
               child: _NavDestination(
-                icon: _items[index].icon,
-                label: _items[index].label,
+                icon: items[index].icon,
+                label: items[index].label,
                 selected: currentIndex == index,
                 onTap: () {
                   if (currentIndex != index) {
-                    context.go(_items[index].route);
+                    context.go(items[index].route);
                   }
                 },
               ),

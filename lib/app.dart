@@ -14,6 +14,10 @@ import 'features/booking/presentation/screens/schedules_screen.dart';
 import 'features/booking/presentation/screens/search_screen.dart';
 import 'features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'features/recording/presentation/screens/recordings_screen.dart';
+import 'features/requests/presentation/requests_screen.dart';
+import 'features/requests/presentation/request_form_screen.dart';
+import 'features/requests/presentation/opd_accounts_screen.dart';
+import 'features/requests/presentation/system_health_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -35,6 +39,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ].contains(path)) {
         return AppRoutes.dashboard;
       }
+      final adminPaths = [
+        AppRoutes.search,
+        AppRoutes.schedules,
+        AppRoutes.recordings,
+        AppRoutes.accounts,
+        AppRoutes.accountForm,
+        AppRoutes.opdAccounts,
+        AppRoutes.systemHealth
+      ];
+      if (adminPaths.contains(path) && auth.user?.isAdmin != true)
+        return AppRoutes.requests;
       return null;
     },
     routes: [
@@ -63,11 +78,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.search,
-        pageBuilder: (context, state) => NoTransitionPage(
-          key: state.pageKey,
-          child: const SearchScreen(),
-        ),
+        builder: (context, state) => const SearchScreen(),
       ),
+      GoRoute(
+          path: AppRoutes.requests,
+          pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey, child: const RequestsScreen())),
+      GoRoute(
+          path: AppRoutes.history,
+          pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey, child: const RequestsScreen(history: true))),
+      GoRoute(
+          path: AppRoutes.requestForm,
+          builder: (context, state) => const RequestFormScreen()),
+      GoRoute(
+          path: AppRoutes.opdAccounts,
+          builder: (context, state) => const OpdAccountsScreen()),
+      GoRoute(
+          path: AppRoutes.systemHealth,
+          builder: (context, state) => const SystemHealthScreen()),
       GoRoute(
         path: AppRoutes.schedules,
         pageBuilder: (context, state) => NoTransitionPage(
