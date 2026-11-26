@@ -11,7 +11,7 @@ import 'package:zoom_monitor_mobile/features/recording/data/models/recording_ite
 import 'package:zoom_monitor_mobile/features/recording/presentation/widgets/recording_card.dart';
 
 void main() {
-  testWidgets('meeting search hero stays usable with enlarged text',
+  testWidgets('meeting request hero stays usable with enlarged text',
       (tester) async {
     tester.view.physicalSize = const Size(320, 700);
     tester.view.devicePixelRatio = 1;
@@ -42,7 +42,7 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text('Cari waktu rapat'));
+    await tester.tap(find.text('Ajukan rapat'));
     expect(searchTapped, isTrue);
   });
 

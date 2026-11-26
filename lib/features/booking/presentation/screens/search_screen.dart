@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/config/app_routes.dart';
 import '../../../../core/widgets/monitoring_labels.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +15,6 @@ import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/section_photo_banner.dart';
 import '../../data/models/availability_result.dart';
 import '../controllers/booking_controller.dart';
-import '../widgets/booking_dialog.dart';
 import '../widgets/conflict_banner.dart';
 import '../widgets/reserved_schedule_notice.dart';
 
@@ -71,18 +72,25 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  void _openBookingSheet(AvailabilityResult result) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => BookingDialog(
-        accountResult: result,
-        date: _formattedDate,
-        startTime: _formattedTime,
-        duration: _selectedDuration,
-      ),
-    );
+  void _openRequestDialog() {
+    showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+              title: const Text('Ajukan rapat melalui persetujuan'),
+              content: const Text(
+                  'Ketersediaan ini membantu perencanaan. Pilih kluster WIB pada formulir pengajuan; admin akan memeriksa ulang akun dan jadwal sebelum membuat meeting.'),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('Tutup')),
+                FilledButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                      context.push(AppRoutes.requestForm);
+                    },
+                    child: const Text('Ajukan rapat'))
+              ],
+            ));
   }
 
   @override
@@ -100,7 +108,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBody: true,
-      bottomNavigationBar: const AppGlassNavBar(currentIndex: 1),
+      bottomNavigationBar: const AppGlassNavBar(currentIndex: -1),
       appBar: AppBar(
         flexibleSpace: const GlassAppBarBackground(),
         title: const Text('Cari waktu rapat'),
@@ -509,12 +517,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   backgroundColor:
                       isAvailable ? AppColors.primary : AppColors.statusMeeting,
                 ),
-                onPressed: isError ? null : () => _openBookingSheet(result),
-                child: Text(isAvailable
-                    ? 'Booking akun'
-                    : isError
-                        ? 'Tidak dapat dibooking'
-                        : 'Paksa booking'),
+                onPressed: isError ? null : _openRequestDialog,
+                child: Text(isError ? 'Belum dapat diperiksa' : 'Ajukan rapat'),
               ),
             ),
           ],

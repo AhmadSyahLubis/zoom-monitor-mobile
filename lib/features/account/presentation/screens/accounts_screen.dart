@@ -79,6 +79,7 @@ class AccountsScreen extends ConsumerWidget {
       appBar: AppBar(
         flexibleSpace: const GlassAppBarBackground(),
         title: const Text('Akun perusahaan'),
+        actions: [GlassIconButton(icon: PhosphorIconsRegular.users, tooltip: 'Akun OPD', onPressed: () => context.push(AppRoutes.opdAccounts))],
       ),
       body: RefreshIndicator(
         color: AppColors.primary,

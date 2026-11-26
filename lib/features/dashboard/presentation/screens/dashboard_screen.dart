@@ -86,7 +86,7 @@ class DashboardScreen extends ConsumerWidget {
                     children: [
                       DashboardHero(
                         userName: userName,
-                        onSearch: () => context.push(AppRoutes.search),
+                        onSearch: () => context.push(AppRoutes.requestForm),
                       ),
                       Consumer(builder: (context, ref, _) {
                         final dashboardState =
@@ -147,8 +147,13 @@ class DashboardScreen extends ConsumerWidget {
                                 color: AppColors.textMain),
                           )),
                           TextButton(
-                            onPressed: () => context.push(AppRoutes.accounts),
-                            child: const Text('Lihat semua',
+                            onPressed: () => context.push(user?.isAdmin == true
+                                ? AppRoutes.accounts
+                                : AppRoutes.requests),
+                            child: Text(
+                                user?.isAdmin == true
+                                    ? 'Lihat semua'
+                                    : 'Lihat pengajuan',
                                 style: TextStyle(
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.w600)),
@@ -170,7 +175,8 @@ class DashboardScreen extends ConsumerWidget {
                       return SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(18, 0, 18, 110),
-                          child: _buildEmptyState(context),
+                          child:
+                              _buildEmptyState(context, user?.isAdmin == true),
                         ),
                       );
                     }
@@ -187,10 +193,12 @@ class DashboardScreen extends ConsumerWidget {
                             backgroundColor: Colors.transparent,
                             builder: (sheetContext) => AccountDetailSheet(
                               account: accounts[idx],
-                              onViewSchedule: () {
-                                Navigator.of(sheetContext).pop();
-                                context.push(AppRoutes.schedules);
-                              },
+                              onViewSchedule: user?.isAdmin == true
+                                  ? () {
+                                      Navigator.of(sheetContext).pop();
+                                      context.push(AppRoutes.schedules);
+                                    }
+                                  : null,
                             ),
                           ),
                         ),
@@ -248,21 +256,25 @@ class DashboardScreen extends ConsumerWidget {
             ],
           ),
         ),
-        bottomNavigationBar: const AppGlassNavBar(currentIndex: 0),
+        bottomNavigationBar:
+            AppGlassNavBar(currentIndex: 0, isAdmin: user?.isAdmin == true),
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, bool admin) {
     return EmptyStateWidget(
       artwork: 'assets/icons/state_accounts.png',
-      title: 'Belum Ada Akun Zoom Terhubung',
-      message:
-          'Tambahkan akun Zoom Server-to-Server (S2S) untuk memulai monitoring otomatis.',
+      title:
+          admin ? 'Belum Ada Akun Zoom Terhubung' : 'Akun Zoom belum tersedia',
+      message: admin
+          ? 'Tambahkan akun Zoom Server-to-Server (S2S) untuk memulai monitoring otomatis.'
+          : 'Hubungi admin Diskominfo untuk ketersediaan akun Zoom.',
       action: ElevatedButton.icon(
-        onPressed: () => context.push(AppRoutes.accountForm),
+        onPressed: () =>
+            context.push(admin ? AppRoutes.accountForm : AppRoutes.requests),
         icon: const Icon(PhosphorIconsBold.plus, size: 18),
-        label: const Text('Tambah Akun Zoom'),
+        label: Text(admin ? 'Tambah Akun Zoom' : 'Lihat pengajuan'),
       ),
     );
   }

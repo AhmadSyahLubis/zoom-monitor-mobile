@@ -13,11 +13,11 @@ class AccountDetailSheet extends ConsumerStatefulWidget {
   const AccountDetailSheet({
     super.key,
     required this.account,
-    required this.onViewSchedule,
+    this.onViewSchedule,
   });
 
   final DashboardAccount account;
-  final VoidCallback onViewSchedule;
+  final VoidCallback? onViewSchedule;
 
   @override
   ConsumerState<AccountDetailSheet> createState() => _AccountDetailSheetState();
@@ -242,10 +242,11 @@ class _AccountDetailSheetState extends ConsumerState<AccountDetailSheet> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      OutlinedButton(
-                        onPressed: widget.onViewSchedule,
-                        child: const Text('Lihat jadwal'),
-                      ),
+                      if (widget.onViewSchedule != null)
+                        OutlinedButton(
+                          onPressed: widget.onViewSchedule,
+                          child: const Text('Lihat jadwal'),
+                        ),
                     ],
                   );
                 },

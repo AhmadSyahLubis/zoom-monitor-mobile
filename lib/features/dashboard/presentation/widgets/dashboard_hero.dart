@@ -103,7 +103,7 @@ class DashboardHero extends StatelessWidget {
                       if (!compact) ...[
                         const SizedBox(height: 6),
                         const Text(
-                          'Temukan akun yang siap pada waktu pilihan Anda.',
+                          'Ajukan kebutuhan rapat untuk diperiksa admin Diskominfo.',
                           style: TextStyle(
                             color: Color(0xFFE0EAF3),
                             fontSize: 12,
@@ -124,12 +124,12 @@ class DashboardHero extends StatelessWidget {
                           ),
                         ),
                         icon: const AppNavSymbol(
-                          kind: AppNavSymbolKind.search,
+                          kind: AppNavSymbolKind.calendar,
                           color: AppColors.primaryDark,
                           size: 18,
                         ),
                         label: const Text(
-                          'Cari waktu rapat',
+                          'Ajukan rapat',
                           style: TextStyle(
                               fontSize: 13, fontWeight: FontWeight.w700),
                         ),
