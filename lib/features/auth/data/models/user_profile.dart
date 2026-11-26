@@ -5,6 +5,10 @@ class UserProfile {
   final String? email;
   final bool hasPin;
   final bool biometricEnabled;
+  final String role;
+  final OpdProfile? opd;
+  bool get isAdmin =>
+      role == 'admin' && opd?.code == 'diskominfo' && opd?.isActive == true;
 
   UserProfile({
     required this.id,
@@ -13,6 +17,8 @@ class UserProfile {
     this.email,
     required this.hasPin,
     required this.biometricEnabled,
+    this.role = 'user',
+    this.opd,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -23,6 +29,10 @@ class UserProfile {
       email: json['email'] as String?,
       hasPin: json['has_pin'] as bool? ?? false,
       biometricEnabled: json['biometric_enabled'] as bool? ?? false,
+      role: json['role'] as String? ?? 'user',
+      opd: json['opd'] is Map<String, dynamic>
+          ? OpdProfile.fromJson(json['opd'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -34,6 +44,8 @@ class UserProfile {
       'email': email,
       'has_pin': hasPin,
       'biometric_enabled': biometricEnabled,
+      'role': role,
+      'opd': opd?.toJson(),
     };
   }
 
@@ -44,6 +56,8 @@ class UserProfile {
     String? email,
     bool? hasPin,
     bool? biometricEnabled,
+    String? role,
+    OpdProfile? opd,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -52,6 +66,31 @@ class UserProfile {
       email: email ?? this.email,
       hasPin: hasPin ?? this.hasPin,
       biometricEnabled: biometricEnabled ?? this.biometricEnabled,
+      role: role ?? this.role,
+      opd: opd ?? this.opd,
     );
   }
+}
+
+class OpdProfile {
+  final int id;
+  final String code;
+  final String name;
+  final bool isActive;
+
+  const OpdProfile(
+      {required this.id,
+      required this.code,
+      required this.name,
+      required this.isActive});
+
+  factory OpdProfile.fromJson(Map<String, dynamic> json) => OpdProfile(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        code: json['code'] as String? ?? '',
+        name: json['name'] as String? ?? '',
+        isActive: json['is_active'] as bool? ?? false,
+      );
+
+  Map<String, dynamic> toJson() =>
+      {'id': id, 'code': code, 'name': name, 'is_active': isActive};
 }
